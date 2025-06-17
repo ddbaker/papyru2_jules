@@ -11,8 +11,7 @@ pub struct MemoizedEasymarkHighlighter {
 }
 
 impl MemoizedEasymarkHighlighter {
-    pub fn highlight(&mut self, egui_style: &egui::Style, code: &str) -> egui::t
-ext::LayoutJob {
+    pub fn highlight(&mut self, egui_style: &egui::Style, code: &str) -> egui::text::LayoutJob {
         if (&self.style, self.code.as_str()) != (egui_style, code) {
             self.style = egui_style.clone();
             code.clone_into(&mut self.code);
@@ -22,8 +21,7 @@ ext::LayoutJob {
     }
 }
 
-pub fn highlight_easymark(egui_style: &egui::Style, mut text: &str) -> egui::tex
-t::LayoutJob {
+pub fn highlight_easymark(egui_style: &egui::Style, mut text: &str) -> egui::text::LayoutJob {
     let mut job = egui::text::LayoutJob::default();
     let mut style = easy_mark_parser::Style::default();
     let mut start_of_line = true;
@@ -51,8 +49,7 @@ t::LayoutJob {
         if text.starts_with('`') {
             style.code = true;
             let end = text[1..]
-                .find(&['`', '
-'][..])
+                .find(&['`', '\n'][..])
                 .map_or_else(|| text.len(), |i| i + 2);
             job.append(&text[..end], 0.0, format_from_style(egui_style, &style))
 ;
@@ -63,7 +60,7 @@ t::LayoutJob {
 
         let mut skip;
 
-        if text.starts_with('\') && text.len() >= 2 {
+        if text.starts_with('\\') && text.len() >= 2 {
             skip = 2;
         } else if start_of_line && text.starts_with(' ') {
             // we don't preview indentation, because it is confusing
@@ -82,8 +79,7 @@ t::LayoutJob {
             skip = 1;
             if style.strong {
                 // Include the character that is ending this style:
-                job.append(&text[..skip], 0.0, format_from_style(egui_style, &st
-yle));
+                job.append(&text[..skip], 0.0, format_from_style(egui_style, &style));
                 text = &text[skip..];
                 skip = 0;
             }
@@ -92,8 +88,7 @@ yle));
             skip = 1;
             if style.small {
                 // Include the character that is ending this style:
-                job.append(&text[..skip], 0.0, format_from_style(egui_style, &st
-yle));
+                job.append(&text[..skip], 0.0, format_from_style(egui_style, &style));
                 text = &text[skip..];
                 skip = 0;
             }
@@ -102,8 +97,7 @@ yle));
             skip = 1;
             if style.raised {
                 // Include the character that is ending this style:
-                job.append(&text[..skip], 0.0, format_from_style(egui_style, &st
-yle));
+                job.append(&text[..skip], 0.0, format_from_style(egui_style, &style));
                 text = &text[skip..];
                 skip = 0;
             }
@@ -111,16 +105,14 @@ yle));
         } else {
             skip = 0;
         }
-        // Note: we don't preview underline, strikethrough and italics because i
-t confuses things.
+        // Note: we don't preview underline, strikethrough and italics because it confuses things.
 
         // Swallow everything up to the next special character:
         let line_end = text[skip..]
-            .find('
-')
+            .find('\n')
             .map_or_else(|| text.len(), |i| (skip + i + 1));
         let end = text[skip..]
-            .find(&['*', '`', '~', '_', '/', '$', '^', '\', '<', '['][..])
+            .find(&['*', '`', '~', '_', '/', '$', '^', '\\', '<', '['][..])
             .map_or_else(|| text.len(), |i| (skip + i).max(1));
 
         if line_end <= end {

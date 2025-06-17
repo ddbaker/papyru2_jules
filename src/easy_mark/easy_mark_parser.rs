@@ -9,10 +9,8 @@
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Item<'a> {
-    /// `
-`
-    // TODO(emilk): add Style here so empty heading still uses up the right amou
-nt of space.
+    /// `\n`
+    // TODO(emilk): add Style here so empty heading still uses up the right amount of space.
     Newline,
 
     /// Text
@@ -115,16 +113,13 @@ impl<'a> Parser<'a> {
         None
     }
 
-    // ```{language}
-{code}```
+    // ```{language}\n{code}``` <--- This comment describes the code block structure
     fn code_block(&mut self) -> Option<Item<'a>> {
         if let Some(language_start) = self.s.strip_prefix("```") {
-            if let Some(newline) = language_start.find('
-') {
+            if let Some(newline) = language_start.find('\n') {
                 let language = &language_start[..newline];
                 let code_start = &language_start[newline + 1..];
-                if let Some(end) = code_start.find("
-```") {
+                if let Some(end) = code_start.find("\n```") {
                     let code = &code_start[..end].trim();
                     self.s = &code_start[end + 4..];
                     self.start_of_line = false;
@@ -144,9 +139,7 @@ impl<'a> Parser<'a> {
             self.s = rest;
             self.start_of_line = false;
             self.style.code = true;
-            let rest_of_line = &self.s[..self.s.find('
-').unwrap_or(self.s.len(
-))];
+            let rest_of_line = &self.s[..self.s.find('\n').unwrap_or(self.s.len())];
             if let Some(end) = rest_of_line.find('`') {
                 let item = Item::Text(self.style, &self.s[..end]);
                 self.s = &self.s[end + 1..];
@@ -166,9 +159,7 @@ impl<'a> Parser<'a> {
     /// `<url>` or `[link](url)`
     fn url(&mut self) -> Option<Item<'a>> {
         if self.s.starts_with('<') {
-            let this_line = &self.s[..self.s.find('
-').unwrap_or(self.s.len())]
-;
+            let this_line = &self.s[..self.s.find('\n').unwrap_or(self.s.len())];
             if let Some(url_end) = this_line.find('>') {
                 let url = &self.s[1..url_end];
                 self.s = &self.s[url_end + 1..];
@@ -179,9 +170,7 @@ impl<'a> Parser<'a> {
 
         // [text](url)
         if self.s.starts_with('[') {
-            let this_line = &self.s[..self.s.find('
-').unwrap_or(self.s.len())]
-;
+            let this_line = &self.s[..self.s.find('\n').unwrap_or(self.s.len())];
             if let Some(bracket_end) = this_line.find(']') {
                 let text = &this_line[1..bracket_end];
                 if this_line[bracket_end + 1..].starts_with('(') {
@@ -211,8 +200,7 @@ impl<'a> Iterator for Parser<'a> {
 
             //
 
-            if self.s.starts_with('
-') {
+            if self.s.starts_with('\n') {
                 self.s = &self.s[1..];
                 self.start_of_line = true;
                 self.style = Style::default();
@@ -228,7 +216,7 @@ impl<'a> Iterator for Parser<'a> {
             }
 
             // \ escape (to show e.g. a backtick)
-            if self.s.starts_with('\') && self.s.len() >= 2 {
+            if self.s.starts_with('\\') && self.s.len() >= 2 {
                 let text = &self.s[1..2];
                 self.s = &self.s[2..];
                 self.start_of_line = false;
@@ -256,8 +244,7 @@ impl<'a> Iterator for Parser<'a> {
                 // > quote
                 if let Some(after) = self.s.strip_prefix("> ") {
                     self.s = after;
-                    self.start_of_line = true; // quote indentation doesn't coun
-t
+                    self.start_of_line = true; // quote indentation doesn't count
                     self.style.quoted = true;
                     return Some(Item::QuoteIndent);
                 }
@@ -276,17 +263,13 @@ t
 
                 // --- separator
                 if let Some(after) = self.s.strip_prefix("---") {
-                    self.s = after.trim_start_matches('-'); // remove extra dash
-es
-                    self.s = self.s.strip_prefix('
-').unwrap_or(self.s); // rem
-ove trailing newline
+                    self.s = after.trim_start_matches('-'); // remove extra dashes
+                    self.s = self.s.strip_prefix('\n').unwrap_or(self.s); // remove trailing newline
                     self.start_of_line = false;
                     return Some(Item::Separator);
                 }
 
-                // ```{language}
-{code}```
+                // ```{language}\n{code}``` <--- This comment describes the code block structure
                 if let Some(item) = self.code_block() {
                     return Some(item);
                 }
@@ -342,9 +325,7 @@ ove trailing newline
             // Swallow everything up to the next special character:
             let end = self
                 .s
-                .find(&['*', '`', '~', '_', '/', '$', '^', '\', '<', '[', '
-']
-[..])
+                .find(&['*', '`', '~', '_', '/', '$', '^', '\\', '<', '[', '\n'][..])
                 .map_or_else(|| self.s.len(), |special| special.max(1));
 
             let item = Item::Text(self.style, &self.s[..end]);

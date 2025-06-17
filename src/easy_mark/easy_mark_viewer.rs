@@ -9,8 +9,7 @@ pub fn easy_mark(ui: &mut Ui, easy_mark: &str) {
     easy_mark_it(ui, easy_mark::Parser::new(easy_mark));
 }
 
-pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Ite
-m<'em>>) {
+pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Item<'em>>) {
     let initial_size = vec2(
         ui.available_width(),
         ui.spacing().interact_size.y, // Assume there will be
@@ -35,10 +34,8 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
 
     match item {
         easy_mark::Item::Newline => {
-            // ui.label("
-"); // too much spacing (paragraph spacing)
-            ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // ma
-ke sure we take up some height
+            // ui.label("\n"); // too much spacing (paragraph spacing)
+            ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // make sure we take up some height
             ui.end_row();
             ui.set_row_height(row_height);
         }
@@ -75,8 +72,7 @@ ke sure we take up some height
         }
         easy_mark::Item::QuoteIndent => {
             let rect = ui
-                .allocate_exact_size(vec2(2.0 * one_indent, row_height), Sense::
-hover())
+                .allocate_exact_size(vec2(2.0 * one_indent, row_height), Sense::hover())
                 .0;
             let rect = rect.expand2(ui.style().spacing.item_spacing * 0.5);
             ui.painter().line_segment(
@@ -85,17 +81,14 @@ hover())
             );
         }
         easy_mark::Item::BulletPoint => {
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover())
-;
+            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
             bullet_point(ui, one_indent);
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover())
-;
+            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
         }
         easy_mark::Item::NumberedPoint(number) => {
             let width = 3.0 * one_indent;
             numbered_point(ui, width, number);
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover())
-;
+            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
         }
         easy_mark::Item::CodeBlock(_language, code) => {
             let where_to_put_background = ui.painter().add(Shape::Noop);
@@ -158,8 +151,7 @@ fn rich_text_from_style(text: &str, style: &easy_mark::Style) -> RichText {
 
 fn bullet_point(ui: &mut Ui, width: f32) -> Response {
     let row_height = ui.text_style_height(&TextStyle::Body);
-    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense
-::hover());
+    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense::hover());
     ui.painter().circle_filled(
         rect.center(),
         rect.height() / 8.0,
@@ -171,8 +163,7 @@ fn bullet_point(ui: &mut Ui, width: f32) -> Response {
 fn numbered_point(ui: &mut Ui, width: f32, number: &str) -> Response {
     let font_id = TextStyle::Body.resolve(ui.style());
     let row_height = ui.fonts(|f| f.row_height(&font_id));
-    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense
-::hover());
+    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense::hover());
     let text = format!("{number}.");
     let text_color = ui.visuals().strong_text_color();
     ui.painter().text(
@@ -181,6 +172,6 @@ fn numbered_point(ui: &mut Ui, width: f32, number: &str) -> Response {
         text,
         font_id,
         text_color,
-    );
+    ); // Semicolon added here
     response
 }

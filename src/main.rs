@@ -24,7 +24,7 @@ impl Default for EasyMarkEditorState {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(EguiPlugin)
+        .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
         .init_resource::<EasyMarkEditorState>() // Initialize the editor state as a resource
         .add_systems(Update, ui_system) // Add the UI system to run every frame
         .run();
