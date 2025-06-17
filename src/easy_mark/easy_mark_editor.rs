@@ -1,5 +1,5 @@
 use egui::{
-    text::CCursorRange, Key, KeyboardShortcut, Modifiers, ScrollArea, TextBuffer, TextEdit, Ui,
+    text::CCursorRange, Key, KeyboardShortcut, Modifiers, ScrollArea, TextBuffer, Ui,
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -83,7 +83,7 @@ impl EasyMarkEditor {
             code, highlighter, ..
         } = self;
 
-        let response = if self.highlight_editor {
+        let _response = if self.highlight_editor {
             let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
                 let mut layout_job = highlighter.highlight(ui.style(), string);
                 layout_job.wrap.max_width = wrap_width;
@@ -145,6 +145,7 @@ fn nested_hotkeys_ui(ui: &mut egui::Ui) {
     });
 }
 
+#[allow(dead_code)]
 fn shortcuts(ui: &Ui, code: &mut dyn TextBuffer, ccursor_range: &mut CCursorRange) -> bool {
     let mut any_change = false;
 
@@ -180,6 +181,7 @@ fn shortcuts(ui: &Ui, code: &mut dyn TextBuffer, ccursor_range: &mut CCursorRang
 }
 
 /// E.g. toggle *strong* with `toggle_surrounding(&mut text, &mut cursor, "*")`
+#[allow(dead_code)]
 fn toggle_surrounding(
     code: &mut dyn TextBuffer,
     ccursor_range: &mut CCursorRange,

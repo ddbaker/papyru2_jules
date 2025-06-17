@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiContextPass};
 
 // This module should exist at src/easy_mark/mod.rs
 // and contain the easy_mark_editor, etc.
@@ -26,7 +26,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true, })
         .init_resource::<EasyMarkEditorState>() // Initialize the editor state as a resource
-        .add_systems(Update, ui_system)
+        .add_systems(EguiContextPass, ui_system)
         .run();
 }
 

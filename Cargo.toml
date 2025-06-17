@@ -7,3 +7,8 @@ edition = "2021"
 bevy = "0.16.1"
 bevy_egui = "0.34.1"
 egui = "0.31.1" # Pinning to the version likely used by bevy_egui 0.34.1
+serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+default = []
+serde = ["dep:serde"]
