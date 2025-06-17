@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::{egui, EguiContextPass, EguiContexts, EguiPlugin};
 
 // This module should exist at src/easy_mark/mod.rs
 // and contain the easy_mark_editor, etc.
@@ -24,17 +24,16 @@ impl Default for EasyMarkEditorState {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
+        .add_plugins(EguiPlugin {
+            enable_multipass_for_primary_context: true,
+        })
         .init_resource::<EasyMarkEditorState>() // Initialize the editor state as a resource
-        .add_systems(Update, ui_system) // Add the UI system to run every frame
+        .add_systems(EguiContextPass, ui_system)
         .run();
 }
 
 // Bevy system to render the Egui UI
-fn ui_system(
-    mut contexts: EguiContexts,
-    mut editor_state: ResMut<EasyMarkEditorState>,
-) {
+fn ui_system(mut contexts: EguiContexts, mut editor_state: ResMut<EasyMarkEditorState>) {
     egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
         // Access the editor through the editor_state resource
         // The EasyMarkEditor::ui method will be called here.
