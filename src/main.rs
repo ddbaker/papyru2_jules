@@ -32,11 +32,9 @@ fn main() {
 
 // Bevy system to render the Egui UI
 fn ui_system(mut contexts: EguiContexts, mut editor_state: ResMut<EasyMarkEditorState>) {
-    egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
-        // Access the editor through the editor_state resource
-        // The EasyMarkEditor::ui method will be called here.
-        // Note: The original EasyMarkEditor::ui takes &mut self and &mut egui::Ui.
-        // We get &mut editor_state.editor and the ui from the CentralPanel.
-        editor_state.editor.ui(ui);
-    });
+    if let Some(mut ctx) = contexts.try_ctx_mut() {
+        egui::CentralPanel::default().show(&mut ctx, |ui| {
+            editor_state.editor.ui(ui);
+        });
+    }
 }
