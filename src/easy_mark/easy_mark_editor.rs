@@ -60,10 +60,10 @@ impl EasyMarkEditor {
 
         if self.show_rendered {
             ui.columns(2, |columns| {
-                ScrollArea::vertical()
+                ScrollArea::vertical().id_salt("editor_scroll_area")
                     // .id_salt("source") // Assuming egui 0.31+ API, id_salt might be removed or changed
                     .show(&mut columns[0], |ui| self.editor_ui(ui));
-                ScrollArea::vertical()
+                ScrollArea::vertical().id_salt("rendered_scroll_area")
                     // .id_salt("rendered") // Assuming egui 0.31+ API, id_salt might be removed or changed
                     .show(&mut columns[1], |ui| {
                         // TODO(emilk): we can save some more CPU by caching the
@@ -72,7 +72,7 @@ impl EasyMarkEditor {
                     });
             });
         } else {
-            ScrollArea::vertical()
+            ScrollArea::vertical().id_salt("editor_scroll_area")
                 // .id_salt("source") // Assuming egui 0.31+ API, id_salt might be removed or changed
                 .show(ui, |ui| self.editor_ui(ui));
         }
