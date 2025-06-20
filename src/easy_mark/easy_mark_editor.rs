@@ -72,7 +72,9 @@ impl EasyMarkEditor {
                     });
             });
         } else {
-            ScrollArea::vertical().id_salt("editor_scroll_area")
+        ScrollArea::vertical()
+            .id_salt("editor_scroll_area")
+            .auto_shrink([false, true]) // Prevent shrinking width, allow vertical scrolling.
                 // .id_salt("source") // Assuming egui 0.31+ API, id_salt might be removed or changed
                 .show(ui, |ui| self.editor_ui(ui));
         }
