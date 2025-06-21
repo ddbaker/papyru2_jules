@@ -32,24 +32,10 @@ impl Default for EasyMarkEditor {
 }
 
 impl EasyMarkEditor {
-    // pub fn panels(&mut self, ctx: &egui::Context) {
-    //     egui::TopBottomPanel::bottom("easy_mark_bottom").show(ctx, |ui| {
-    //         let layout = egui::Layout::top_down(egui::Align::Center).with_main_j
-// ustify(true);
-    //         ui.allocate_ui_with_layout(ui.available_size(), layout, |ui| {
-    //             ui.add(crate::egui_github_link_file!())
-    //         })
-    //     });
-    //
-    //     egui::CentralPanel::default().show(ctx, |ui| {
-    //         self.ui(ui);
-    //     });
-    // }
-
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         egui::Grid::new("controls").show(ui, |ui| {
             let _response = ui.button("Hotkeys").on_hover_ui(nested_hotkeys_ui);
-            ui.checkbox(&mut self.show_rendered, "Show rendered");
+            ui.checkbox(&mut self.show_rendered, "TEST Show rendered TEST");
             ui.checkbox(&mut self.highlight_editor, "Highlight editor");
             if ui.button("Reset").clicked() {
                 *self = Default::default();
@@ -59,23 +45,41 @@ impl EasyMarkEditor {
         ui.separator();
 
         if self.show_rendered {
-            ui.columns(2, |columns| {
-                ScrollArea::vertical().id_salt("editor_scroll_area")
-                    // .id_salt("source") // Assuming egui 0.31+ API, id_salt might be removed or changed
-                    .show(&mut columns[0], |ui| self.editor_ui(ui));
-                ScrollArea::vertical().id_salt("rendered_scroll_area")
-                    // .id_salt("rendered") // Assuming egui 0.31+ API, id_salt might be removed or changed
-                    .show(&mut columns[1], |ui| {
-                        // TODO(emilk): we can save some more CPU by caching the
-                        // rendered output.
+            // ui.columns(2, |columns| {
+            //     ScrollArea::vertical().id_salt(egui::Id::new("editor_scroll_area"))
+            //         .show(&mut columns[0], |ui| self.editor_ui(ui));
+            //     ScrollArea::vertical()
+            //         .id_salt(egui::Id::new("rendered_scroll_area"))
+            //         .min_scrolled_width(100.0)
+            //         .min_scrolled_height(100.0)
+            //         .show(&mut columns[1], |ui| {
+            //             super::easy_mark_viewer::easy_mark(ui, &self.code);
+            //         });
+            // });
+
+            // EXPERIMENTAL: Simple vertical layout
+            ui.vertical(|ui| {
+                ui.label("EDITOR AREA (Scrollable):");
+                ScrollArea::vertical()
+                    .id_salt(egui::Id::new("editor_scroll_area_v"))
+                    .min_scrolled_height(200.0) // Give editor some min height
+                    .show(ui, |ui| self.editor_ui(ui));
+
+                ui.separator();
+                ui.label("RENDERED AREA (Scrollable, Simplified Viewer):");
+                ScrollArea::vertical()
+                    .id_salt(egui::Id::new("rendered_scroll_area_v"))
+                    .min_scrolled_width(100.0)
+                    .min_scrolled_height(200.0) // Give viewer some min height
+                    .show(ui, |ui| {
                         super::easy_mark_viewer::easy_mark(ui, &self.code);
                     });
             });
+
         } else {
-        ScrollArea::vertical()
-            .id_salt("editor_scroll_area")
-            .auto_shrink([false, true]) // Prevent shrinking width, allow vertical scrolling.
-                // .id_salt("source") // Assuming egui 0.31+ API, id_salt might be removed or changed
+            ScrollArea::vertical()
+                .id_salt(egui::Id::new("editor_scroll_area_single"))
+                .auto_shrink([false, true])
                 .show(ui, |ui| self.editor_ui(ui));
         }
     }
@@ -95,23 +99,12 @@ impl EasyMarkEditor {
             ui.add(
                 egui::TextEdit::multiline(code)
                     .desired_width(f32::INFINITY)
-                    .font(egui::TextStyle::Monospace) // for cursor height
+                    .font(egui::TextStyle::Monospace)
                     .layouter(&mut layouter),
             )
         } else {
             ui.add(egui::TextEdit::multiline(code).desired_width(f32::INFINITY))
         };
-
-        // TODO: Revisit cursor manipulation if TextEditState API for egui 0.31+ allows direct access
-        // if let Some(mut state) = TextEdit::load_state(ui.ctx(), response.id) {
-        //     if let Some(mut ccursor_range) = state.cursor.char_range() { // .cursor might be private
-        //         let any_change = shortcuts(ui, code, &mut ccursor_range);
-        //         if any_change {
-        //             state.cursor.set_char_range(Some(ccursor_range)); // .cursor might be private
-        //             state.store(ui.ctx(), response.id);
-        //         }
-        //     }
-        // }
     }
 }
 
@@ -152,13 +145,8 @@ fn shortcuts(ui: &Ui, code: &mut dyn TextBuffer, ccursor_range: &mut CCursorRang
     let mut any_change = false;
 
     if ui.input_mut(|i| i.consume_shortcut(&SHORTCUT_INDENT)) {
-        // This is a placeholder till we can indent the active line
         any_change = true;
-        // let [primary, _secondary] = ccursor_range.sorted_cursors(); // .sorted_cursors() might not exist
         let primary = ccursor_range.primary;
-        // let _secondary = ccursor_range.secondary;
-
-
         let advance = code.insert_text("  ", primary.index);
         ccursor_range.primary.index += advance;
         ccursor_range.secondary.index += advance;
@@ -182,17 +170,14 @@ fn shortcuts(ui: &Ui, code: &mut dyn TextBuffer, ccursor_range: &mut CCursorRang
     any_change
 }
 
-/// E.g. toggle *strong* with `toggle_surrounding(&mut text, &mut cursor, "*")`
 #[allow(dead_code)]
 fn toggle_surrounding(
     code: &mut dyn TextBuffer,
     ccursor_range: &mut CCursorRange,
     surrounding: &str,
 ) {
-    // let [primary, secondary] = ccursor_range.sorted_cursors(); // .sorted_cursors() might not exist
     let primary = ccursor_range.primary;
     let secondary = ccursor_range.secondary;
-
 
     let surrounding_ccount = surrounding.chars().count();
 
@@ -215,23 +200,17 @@ fn toggle_surrounding(
     }
 }
 
-// ----------------------------------------------------------------------------
-
 const DEFAULT_CODE: &str = r#"
 # EasyMark
 EasyMark is a markup language, designed for extreme simplicity.
-
 ```
 WARNING: EasyMark is still an evolving specification,
 and is also missing some features.
 ```
-
 ----------------
-
 # At a glance
 - inline text:
-  - normal, `code`, *strong*, ~strikethrough~, _underline_, /italics/, ^raised^,
- $small$
+  - normal, `code`, *strong*, ~strikethrough~, _underline_, /italics/, ^raised^, $small$
   - `\` escapes the next character
   - [hyperlink](https://github.com/emilk/egui)
   - Embedded URL: <https://github.com/emilk/egui>
@@ -243,33 +222,22 @@ and is also missing some features.
 - ``` code fence
 - a^2^ + b^2^ = c^2^
 - $Remember to read the small print$
-
 # Design
 > /"Why do what everyone else is doing, when everyone else is already doing it?"
 >   \- Emil
-
 Goals:
 1. easy to parse
 2. easy to learn
 3. similar to markdown
-
 [The reference parser](https://github.com/emilk/egui/blob/main/crates/egui_demo_lib/src/easy_mark/easy_mark_parser.rs) is \~250 lines of code, using only the Rust standard library. The parser uses no look-ahead or recursion.
-
 There is never more than one way to accomplish the same thing, and each special character is only used for one thing. For instance `*` is used for *strong* and `-` is used for bullet lists. There is no alternative way to specify the *strong * style or getting a bullet list.
-
 Similarity to markdown is kept when possible, but with much less ambiguity and s ome improvements (like _underlining_).
-
 # Details
 All style changes are single characters, so it is `*strong*`, NOT `**strong**`. Style is reset by a matching character, or at the end of the line.
-
 Style change characters and escapes (`\`) work everywhere except for in inline code, code blocks and in URLs.
-
 You can mix styles. For instance: /italics _underline_/ and *strong `code`*.
-
 You can use styles on URLs: ~my webpage is at <http://www.example.com>~.
-
 Newlines are preserved. If you want to continue text on the same line, just do so. Alternatively, escape the newline by ending the line with a backslash (`\`). Escaping the newline effectively ignores it.
-
 The style characters are chosen to be similar to what they are representing:
   `_` = _underline_
   `~` = ~strikethrough~ (`-` is used for bullet points)
@@ -277,14 +245,12 @@ The style characters are chosen to be similar to what they are representing:
   `*` = *strong*
   `$` = $small$
   `^` = ^raised^
-
 # To do
 - Sub-headers (`## h2`, `### h3` etc)
 - Hotkey Editor
 - International keyboard algorithm for non-letter keys
 - ALT+SHIFT+Num1 is not a functioning hotkey
 - Tab Indent Increment/Decrement CTRL+], CTRL+[
-
 - Images
   - we want to be able to optionally specify size (width and\/or height)
   - centering of images is very desirable

@@ -23,85 +23,91 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Ite
         ui.set_row_height(row_height);
 
         for item in items {
+            println!("Viewer: Received item: {:?}", item);
             item_ui(ui, item);
         }
     });
 }
 
 pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
-    let row_height = ui.text_style_height(&TextStyle::Body);
-    let one_indent = row_height / 2.0;
+    println!("Viewer: item_ui called for: {:?}. Forcing simple label.", item);
+    ui.label(format!("Test Label for item: {:?}", item)); // Simple label
+    ui.label("---"); // Separator to see multiple labels if they stack
 
-    match item {
-        easy_mark::Item::Newline => {
-            // ui.label("\n"); // too much spacing (paragraph spacing)
-            ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // make sure we take up some height
-            ui.end_row();
-            ui.set_row_height(row_height);
-        }
+    // All original match logic below is temporarily bypassed
+    // let row_height = ui.text_style_height(&TextStyle::Body);
+    // let one_indent = row_height / 2.0;
 
-        easy_mark::Item::Text(style, text) => {
-            let label = rich_text_from_style(text, &style);
-            if style.small && !style.raised {
-                ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
-                    ui.set_min_height(row_height);
-                    ui.label(label);
-                });
-            } else {
-                ui.label(label);
-            }
-        }
-        easy_mark::Item::Hyperlink(style, text, url) => {
-            let label = rich_text_from_style(text, &style);
-            if style.small && !style.raised {
-                ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
-                    ui.set_height(row_height);
-                    ui.add(Hyperlink::from_label_and_url(label, url));
-                });
-            } else {
-                ui.add(Hyperlink::from_label_and_url(label, url));
-            }
-        }
+    // match item {
+    //     easy_mark::Item::Newline => {
+    //         // ui.label("\n"); // too much spacing (paragraph spacing)
+    //         ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // make sure we take up some height
+    //         ui.end_row();
+    //         ui.set_row_height(row_height);
+    //     }
 
-        easy_mark::Item::Separator => {
-            ui.add(Separator::default().horizontal());
-        }
-        easy_mark::Item::Indentation(indent) => {
-            let indent = indent as f32 * one_indent;
-            ui.allocate_exact_size(vec2(indent, row_height), Sense::hover());
-        }
-        easy_mark::Item::QuoteIndent => {
-            let rect = ui
-                .allocate_exact_size(vec2(2.0 * one_indent, row_height), Sense::hover())
-                .0;
-            let rect = rect.expand2(ui.style().spacing.item_spacing * 0.5);
-            ui.painter().line_segment(
-                [rect.center_top(), rect.center_bottom()],
-                (1.0, ui.visuals().weak_text_color()),
-            );
-        }
-        easy_mark::Item::BulletPoint => {
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
-            bullet_point(ui, one_indent);
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
-        }
-        easy_mark::Item::NumberedPoint(number) => {
-            let width = 3.0 * one_indent;
-            numbered_point(ui, width, number);
-            ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
-        }
-        easy_mark::Item::CodeBlock(_language, code) => {
-            let where_to_put_background = ui.painter().add(Shape::Noop);
-            let mut rect = ui.monospace(code).rect;
-            rect = rect.expand(1.0); // looks better
-            rect.max.x = ui.max_rect().max.x;
-            let code_bg_color = ui.visuals().code_bg_color;
-            ui.painter().set(
-                where_to_put_background,
-                Shape::rect_filled(rect, 1.0, code_bg_color),
-            );
-        }
-    };
+    //     easy_mark::Item::Text(style, text) => {
+    //         let label = rich_text_from_style(text, &style);
+    //         if style.small && !style.raised {
+    //             ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
+    //                 ui.set_min_height(row_height);
+    //                 ui.label(label);
+    //             });
+    //         } else {
+    //             ui.label(label);
+    //         }
+    //     }
+    //     easy_mark::Item::Hyperlink(style, text, url) => {
+    //         let label = rich_text_from_style(text, &style);
+    //         if style.small && !style.raised {
+    //             ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
+    //                 ui.set_height(row_height);
+    //                 ui.add(Hyperlink::from_label_and_url(label, url));
+    //             });
+    //         } else {
+    //             ui.add(Hyperlink::from_label_and_url(label, url));
+    //         }
+    //     }
+
+    //     easy_mark::Item::Separator => {
+    //         ui.add(Separator::default().horizontal());
+    //     }
+    //     easy_mark::Item::Indentation(indent) => {
+    //         let indent = indent as f32 * one_indent;
+    //         ui.allocate_exact_size(vec2(indent, row_height), Sense::hover());
+    //     }
+    //     easy_mark::Item::QuoteIndent => {
+    //         let rect = ui
+    //             .allocate_exact_size(vec2(2.0 * one_indent, row_height), Sense::hover())
+    //             .0;
+    //         let rect = rect.expand2(ui.style().spacing.item_spacing * 0.5);
+    //         ui.painter().line_segment(
+    //             [rect.center_top(), rect.center_bottom()],
+    //             (1.0, ui.visuals().weak_text_color()),
+    //         );
+    //     }
+    //     easy_mark::Item::BulletPoint => {
+    //         ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
+    //         bullet_point(ui, one_indent);
+    //         ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
+    //     }
+    //     easy_mark::Item::NumberedPoint(number) => {
+    //         let width = 3.0 * one_indent;
+    //         numbered_point(ui, width, number);
+    //         ui.allocate_exact_size(vec2(one_indent, row_height), Sense::hover());
+    //     }
+    //     easy_mark::Item::CodeBlock(_language, code) => {
+    //         let where_to_put_background = ui.painter().add(Shape::Noop);
+    //         let mut rect = ui.monospace(code).rect;
+    //         rect = rect.expand(1.0); // looks better
+    //         rect.max.x = ui.max_rect().max.x;
+    //         let code_bg_color = ui.visuals().code_bg_color;
+    //         ui.painter().set(
+    //             where_to_put_background,
+    //             Shape::rect_filled(rect, 1.0, code_bg_color),
+    //         );
+    //     }
+    // };
 }
 
 fn rich_text_from_style(text: &str, style: &easy_mark::Style) -> RichText {
