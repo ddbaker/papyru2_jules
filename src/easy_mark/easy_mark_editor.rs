@@ -63,10 +63,9 @@ impl EasyMarkEditor {
                 ScrollArea::vertical()
                     .id_salt(egui::Id::new("editor_scroll_area_v"))
                     .min_scrolled_height(200.0) // Give editor some min height
+                    .auto_shrink([false, false]) // Prevent scroll area from shrinking based on content
                     .show(ui, |ui_editor| {
-                        // self.editor_ui(ui_editor); // Temporarily disabled
-                        ui_editor.label("Simplified Editor Content Test");
-                        ui_editor.label("Another line in simplified editor");
+                        self.editor_ui(ui_editor); // Re-enabled
                     });
 
                 ui.separator();
