@@ -23,14 +23,14 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Ite
         ui.set_row_height(row_height);
 
         for item in items {
-            println!("Viewer: Received item: {:?}", item);
+            // println!("Viewer: Received item: {:?}", item); // Silenced
             item_ui(ui, item);
         }
     });
 }
 
 pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
-    println!("Viewer: item_ui called for: {:?}. Forcing simple label.", item);
+    // println!("Viewer: item_ui called for: {:?}. Forcing simple label.", item); // Silenced
     ui.label(format!("Test Label for item: {:?}", item)); // Simple label
     ui.label("---"); // Separator to see multiple labels if they stack
 

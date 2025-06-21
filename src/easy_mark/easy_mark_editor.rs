@@ -66,14 +66,16 @@ impl EasyMarkEditor {
                     .show(ui, |ui| self.editor_ui(ui));
 
                 ui.separator();
-                ui.label("RENDERED AREA (Scrollable, Simplified Viewer):");
-                ScrollArea::vertical()
-                    .id_salt(egui::Id::new("rendered_scroll_area_v"))
-                    .min_scrolled_width(100.0)
-                    .min_scrolled_height(200.0) // Give viewer some min height
-                    .show(ui, |ui| {
-                        super::easy_mark_viewer::easy_mark(ui, &self.code);
-                    });
+                ui.label("RENDERED AREA LABEL TEST:");
+                ui.label("If you see this, the vertical layout is working past the separator.");
+                // ScrollArea::vertical()
+                //     .id_salt(egui::Id::new("rendered_scroll_area_v"))
+                //     .min_scrolled_width(100.0)
+                //     .min_scrolled_height(200.0) // Give viewer some min height
+                //     .show(ui, |ui| {
+                //         // super::easy_mark_viewer::easy_mark(ui, &self.code); // Temporarily disabled
+                //         ui.label("Content inside ScrollArea for RENDERED AREA");
+                //     });
             });
 
         } else {
