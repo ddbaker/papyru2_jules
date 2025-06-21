@@ -253,32 +253,22 @@ Goals:
 2. easy to learn
 3. similar to markdown
 
-[The reference parser](https://github.com/emilk/egui/blob/main/crates/egui_demo_
-lib/src/easy_mark/easy_mark_parser.rs) is \~250 lines of code, using only the Ru
-st standard library. The parser uses no look-ahead or recursion.
+[The reference parser](https://github.com/emilk/egui/blob/main/crates/egui_demo_lib/src/easy_mark/easy_mark_parser.rs) is \~250 lines of code, using only the Rust standard library. The parser uses no look-ahead or recursion.
 
-There is never more than one way to accomplish the same thing, and each special
-character is only used for one thing. For instance `*` is used for *strong* and
-`-` is used for bullet lists. There is no alternative way to specify the *strong
-* style or getting a bullet list.
+There is never more than one way to accomplish the same thing, and each special character is only used for one thing. For instance `*` is used for *strong* and `-` is used for bullet lists. There is no alternative way to specify the *strong * style or getting a bullet list.
 
-Similarity to markdown is kept when possible, but with much less ambiguity and s
-ome improvements (like _underlining_).
+Similarity to markdown is kept when possible, but with much less ambiguity and s ome improvements (like _underlining_).
 
 # Details
-All style changes are single characters, so it is `*strong*`, NOT `**strong**`.
-Style is reset by a matching character, or at the end of the line.
+All style changes are single characters, so it is `*strong*`, NOT `**strong**`. Style is reset by a matching character, or at the end of the line.
 
-Style change characters and escapes (`\`) work everywhere except for in inline c
-ode, code blocks and in URLs.
+Style change characters and escapes (`\`) work everywhere except for in inline code, code blocks and in URLs.
 
 You can mix styles. For instance: /italics _underline_/ and *strong `code`*.
 
 You can use styles on URLs: ~my webpage is at <http://www.example.com>~.
 
-Newlines are preserved. If you want to continue text on the same line, just do s
-o. Alternatively, escape the newline by ending the line with a backslash (`\`).
-Escaping the newline effectively ignores it.
+Newlines are preserved. If you want to continue text on the same line, just do so. Alternatively, escape the newline by ending the line with a backslash (`\`). Escaping the newline effectively ignores it.
 
 The style characters are chosen to be similar to what they are representing:
   `_` = _underline_
