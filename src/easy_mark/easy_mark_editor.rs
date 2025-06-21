@@ -101,14 +101,17 @@ impl EasyMarkEditor {
                 ui.fonts(|f| f.layout_job(layout_job))
             };
 
-            ui.add(
-                egui::TextEdit::multiline(code)
-                    .desired_width(f32::INFINITY)
-                    .font(egui::TextStyle::Monospace)
-                    .layouter(&mut layouter),
-            )
+            let text_edit = egui::TextEdit::multiline(code)
+                .desired_width(f32::INFINITY)
+                .desired_height(ui.available_height()) // Explicitly set desired height
+                .font(egui::TextStyle::Monospace) // for cursor height
+                .layouter(&mut layouter);
+            ui.add(text_edit)
         } else {
-            ui.add(egui::TextEdit::multiline(code).desired_width(f32::INFINITY))
+            let text_edit = egui::TextEdit::multiline(code)
+                .desired_width(f32::INFINITY)
+                .desired_height(ui.available_height()); // Explicitly set desired height
+            ui.add(text_edit)
         };
     }
 }
