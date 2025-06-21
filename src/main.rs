@@ -23,7 +23,7 @@ impl Default for EasyMarkEditorState {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.build().disable::<bevy::audio::AudioPlugin>())
+        .add_plugins(DefaultPlugins)
         .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true, })
         .init_resource::<EasyMarkEditorState>() // Initialize the editor state as a resource
         .add_systems(EguiContextPass, ui_system)

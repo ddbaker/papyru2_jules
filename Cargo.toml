@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.16.1"
+bevy = { version = "0.16.1", default-features = false, features = [
+    "animation", "bevy_scene", "bevy_winit",
+    "bevy_pbr", "bevy_render", "bevy_text", "bevy_ui", "multi_threaded", "hdr",
+    "x11", "tonemapping_luts", "default_font",
+]}
 bevy_egui = "0.34.1"
 egui = "0.31.1" # Pinning to the version likely used by bevy_egui 0.34.1
 serde = { version = "1", features = ["derive"], optional = true }
