@@ -62,10 +62,11 @@ impl EasyMarkEditor {
                 ui.label("EDITOR AREA (Scrollable):");
                 ScrollArea::vertical()
                     .id_salt(egui::Id::new("editor_scroll_area_v"))
-                    .min_scrolled_height(200.0) // Give editor some min height
-                    .auto_shrink([false, false]) // Prevent scroll area from shrinking based on content
+                    .min_scrolled_height(200.0)
+                    .max_height(ui.available_height() * 0.6) // Try capping editor ScrollArea height
+                    .auto_shrink([false, false])
                     .show(ui, |ui_editor| {
-                        self.editor_ui(ui_editor); // Re-enabled
+                        self.editor_ui(ui_editor);
                     });
 
                 ui.separator();
@@ -103,14 +104,14 @@ impl EasyMarkEditor {
 
             let text_edit = egui::TextEdit::multiline(code)
                 .desired_width(f32::INFINITY)
-                .desired_height(ui.available_height()) // Explicitly set desired height
+                // .desired_height(ui.available_height()) // Removed erroneous call
                 .font(egui::TextStyle::Monospace) // for cursor height
                 .layouter(&mut layouter);
             ui.add(text_edit)
         } else {
             let text_edit = egui::TextEdit::multiline(code)
-                .desired_width(f32::INFINITY)
-                .desired_height(ui.available_height()); // Explicitly set desired height
+                .desired_width(f32::INFINITY);
+                // .desired_height(ui.available_height()); // Removed erroneous call
             ui.add(text_edit)
         };
     }
