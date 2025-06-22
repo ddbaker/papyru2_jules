@@ -41,8 +41,9 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
             println!("Viewer: Processed Newline (using allocate_exact_size)");
         }
         easy_mark::Item::Text(_style, text) => { // Ignoring style for now
+            println!("Viewer: Text item content: '{}', len: {}", text, text.len()); // Debug text
             ui.label(text);
-            println!("Viewer: Processed Text: {}", text);
+            // println!("Viewer: Processed Text: {}", text); // Covered by above
         }
         easy_mark::Item::Separator => {
             ui.add(Separator::default().horizontal());
