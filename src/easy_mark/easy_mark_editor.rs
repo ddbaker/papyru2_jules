@@ -45,12 +45,13 @@ impl EasyMarkEditor {
         ui.separator();
 
         if self.show_rendered {
+            let available_height = ui.available_height(); // Calculate *before* columns closure
             ui.columns(2, |columns| {
                 // Column 0: Rendered View (Left)
                 ScrollArea::vertical()
                     .id_salt(egui::Id::new("rendered_scroll_area_side"))
                     .min_scrolled_width(100.0)
-                    .min_scrolled_height(ui.available_height())
+                    .min_scrolled_height(available_height) // Use pre-calculated value
                     .auto_shrink([false, false])
                     .show(&mut columns[0], |ui_viewer| {
                         super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
@@ -59,7 +60,7 @@ impl EasyMarkEditor {
                 // Column 1: Editor (Right)
                 ScrollArea::vertical()
                     .id_salt(egui::Id::new("editor_scroll_area_side"))
-                    .min_scrolled_height(ui.available_height())
+                    .min_scrolled_height(available_height) // Use pre-calculated value
                     .auto_shrink([false, false])
                     .show(&mut columns[1], |ui_editor| {
                         self.editor_ui(ui_editor);
