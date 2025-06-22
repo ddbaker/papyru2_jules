@@ -59,11 +59,11 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                     current_line_items.clear();
                     list_marker_next = None;
 
-                    println!("[DEBUG] easy_mark_it: Matched Item::Separator. About to add egui::Separator.");
+                    // println!("[DEBUG] easy_mark_it: Matched Item::Separator. About to add egui::Separator."); // [JULES] Commented out
                     ui.add_space(ui.spacing().item_spacing.y / 2.0);
                     ui.add(egui::Separator::default());
                     ui.add_space(ui.spacing().item_spacing.y / 2.0);
-                    println!("[DEBUG] easy_mark_it: egui::Separator added.");
+                    // println!("[DEBUG] easy_mark_it: egui::Separator added."); // [JULES] Commented out
 
                     indent_level = 0;
                     quote_level = 0;

@@ -133,7 +133,7 @@ impl<'a> Iterator for Parser<'a> {
     type Item = Item<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("[PARSER LoopTop] s: '{:?}', start_of_line: {}, style: {:?}", self.s.chars().take(30).collect::<String>(), self.start_of_line, self.style);
+        // println!("[PARSER LoopTop] s: '{:?}', start_of_line: {}, style: {:?}", self.s.chars().take(30).collect::<String>(), self.start_of_line, self.style);
 
         if self.s.is_empty() {
             return None;
@@ -170,9 +170,9 @@ impl<'a> Iterator for Parser<'a> {
             if let Some(s_after_hash) = self.s.strip_prefix('#') {
                 if !s_after_hash.is_empty() && (s_after_hash.starts_with(' ') || s_after_hash.starts_with('\t')) {
                     let after_trimmed_whitespace = s_after_hash.trim_start();
-                    println!("[PARSER #] Detected heading. `s_after_hash`: '{:?}', `after_trimmed_whitespace`: '{:?}'",
-                             s_after_hash.chars().take(30).collect::<String>(),
-                             after_trimmed_whitespace.chars().take(30).collect::<String>());
+                    // println!("[PARSER #] Detected heading. `s_after_hash`: '{:?}', `after_trimmed_whitespace`: '{:?}'",
+                    //          s_after_hash.chars().take(30).collect::<String>(),
+                    //          after_trimmed_whitespace.chars().take(30).collect::<String>());
                     self.s = after_trimmed_whitespace;
                     self.start_of_line = false; // Text of heading is not at start_of_line
                     self.style.heading = true;  // Style applies until newline or reset
@@ -251,10 +251,10 @@ impl<'a> Iterator for Parser<'a> {
         let find_result = self.s.find(special_chars);
         let end = find_result.unwrap_or(self.s.len());
 
-        println!("[PARSER Swallow] s: '{:?}', find_result: {:?}, calculated_end: {}",
-                 self.s.chars().take(30).collect::<String>(),
-                 find_result,
-                 end);
+        // println!("[PARSER Swallow] s: '{:?}', find_result: {:?}, calculated_end: {}",
+        //          self.s.chars().take(30).collect::<String>(),
+        //          find_result,
+        //          end);
 
         if end == 0 { // Found special char at the start, but it wasn't handled by toggles/inline_code/url
                       // This implies it's a lone special char to be treated as text, or start of next structure.
@@ -271,9 +271,9 @@ impl<'a> Iterator for Parser<'a> {
                 let text_slice = &self.s[..effective_end];
                 self.s = &self.s[effective_end..];
                 // self.start_of_line = false; // Already false or set by now
-                if let Item::Text(style, text_content) = Item::Text(self.style, text_slice) {
-                     println!("[PARSER Text] Yielding Text (fallback, end=0 case): content='{}', style={:?}", text_content, style);
-                }
+                // if let Item::Text(style, text_content) = Item::Text(self.style, text_slice) {
+                //      println!("[PARSER Text] Yielding Text (fallback, end=0 case): content='{}', style={:?}", text_content, style);
+                // }
                 return Some(Item::Text(self.style, text_slice));
             } else { // end is 0 and s is empty - should be caught by s.is_empty() at top
                 return None;
@@ -284,9 +284,9 @@ impl<'a> Iterator for Parser<'a> {
         let text_slice = &self.s[..end];
         self.s = &self.s[end..];
         // self.start_of_line = false; // Already false or set by now
-        if let Item::Text(style, content) = Item::Text(self.style, text_slice) {
-             println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", content, style);
-        }
+        // if let Item::Text(style, content) = Item::Text(self.style, text_slice) {
+        //      println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", content, style);
+        // }
         return Some(Item::Text(self.style, text_slice));
     }
 }
