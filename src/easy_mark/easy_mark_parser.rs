@@ -364,7 +364,9 @@ impl<'a> Iterator for Parser<'a> {
             let item = Item::Text(self.style, &self.s[..end]);
             self.s = &self.s[end..];
             self.start_of_line = false;
-            println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", item.1, item.0);
+            if let Item::Text(style, text_content) = &item { // Correctly destructure
+                 println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", text_content, style);
+            }
             return Some(item);
         }
     }
