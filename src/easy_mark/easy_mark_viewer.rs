@@ -31,26 +31,23 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Ite
 
 pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
     println!("Viewer: item_ui called for: {:?}", item);
-    let row_height = ui.text_style_height(&TextStyle::Body);
-    println!("Viewer: row_height calculated as: {}", row_height); // Ensure this is active
+    // let row_height = ui.text_style_height(&TextStyle::Body); // Not needed for this specific test
+    // println!("Viewer: row_height calculated as: {}", row_height);
     // let one_indent = row_height / 2.0;
 
-    match item {
-        easy_mark::Item::Newline => {
-            ui.allocate_exact_size(egui::vec2(0.0, row_height), egui::Sense::hover());
-            println!("Viewer: Processed Newline (using allocate_exact_size)");
+    if let easy_mark::Item::Text(style, text) = item {
+        println!("---Viewer: Item is Text--- content: '{}', len: {}", text, text.len());
+        if text.trim().is_empty() {
+            println!("---Viewer: Text is whitespace, allocating space to make it visible if it were the only issue.");
+            // Allocate some space for purely whitespace text to see if it's a "draws nothing" issue
+             ui.allocate_exact_size(egui::vec2(0.0, 14.0), egui::Sense::hover()); // Use a nominal height
+        } else {
+            let label = rich_text_from_style(text, &style);
+            ui.label(label);
         }
-        easy_mark::Item::Text(style, text) => { // style is captured again
-            println!("---Viewer: ENTERED Text ARM--- for text: '{}', len: {}", text, text.len());
-            ui.label(text); // Still simple ui.label for now
-        }
-        easy_mark::Item::Separator => {
-            ui.add(Separator::default().horizontal());
-            println!("Viewer: Processed Separator");
-        }
-        _ => {
-            println!("---Viewer: ENTERED SKIP ARM--- for item: {:?}", item);
-        }
+    } else {
+        // For this test, other items do nothing visually and are not explicitly logged by item_ui's match
+        // They will still be logged by the "Viewer: item_ui called for: {:?}" line above.
     }
 }
 
