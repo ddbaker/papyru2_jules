@@ -16,15 +16,14 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
 
     let base_row_height = ui.text_style_height(&TextStyle::Body);
     let one_indent_pixels = base_row_height * 1.5;
-    // quote_marker string removed, will draw graphically
 
     let mut current_line_items: Vec<easy_mark::Item> = Vec::new();
-    let mut items = items_iter.peekable();
+    // let mut items = items_iter.peekable(); // Not peeking anymore in this revised structure
 
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = ui.spacing().item_spacing.y * 0.5;
 
-        while let Some(item) = items.next() {
+        for item in items_iter { // Iterate directly, no peek needed for this simplified logic
             // println!("Viewer (easy_mark_it): Processing Item: {:?}", item);
             match item {
                 easy_mark::Item::Indentation(level) => indent_level = level,
@@ -39,7 +38,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                         quote_level,
                         &list_marker_next,
                         one_indent_pixels,
-                        base_row_height, // Pass base_row_height
+                        base_row_height,
                     );
                     current_line_items.clear();
                     indent_level = 0;
@@ -47,18 +46,17 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                     list_marker_next = None;
                 }
                 easy_mark::Item::Separator => {
-                    if !current_line_items.is_empty() {
-                        render_line(
-                            ui,
-                            &current_line_items,
-                            indent_level,
-                            quote_level,
-                            &list_marker_next,
-                            one_indent_pixels,
-                            base_row_height, // Pass base_row_height
-                        );
-                        current_line_items.clear();
-                    }
+                    // Render any pending line items before the separator
+                    render_line(
+                        ui,
+                        &current_line_items,
+                        indent_level,
+                        quote_level,
+                        &list_marker_next,
+                        one_indent_pixels,
+                        base_row_height,
+                    );
+                    current_line_items.clear();
                     list_marker_next = None;
 
                     println!("[DEBUG] easy_mark_it: Matched Item::Separator. About to add egui::Separator.");
@@ -69,30 +67,16 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
 
                     indent_level = 0;
                     quote_level = 0;
+                    // list_marker_next is already None
                 }
-                _ => { // Text, Hyperlink, CodeBlock
+                _ => { // Text, Hyperlink, CodeBlock - ONLY ACCUMULATE
                     current_line_items.push(item);
-                    if items.peek().map_or(true, |next_item| {
-                        matches!(next_item, easy_mark::Item::Newline | easy_mark::Item::Separator)
-                    }) {
-                        render_line(
-                            ui,
-                            &current_line_items,
-                            indent_level,
-                            quote_level,
-                            &list_marker_next,
-                            one_indent_pixels,
-                            base_row_height, // Pass base_row_height
-                        );
-                        current_line_items.clear();
-                        if list_marker_next.is_some() && !current_line_items.iter().any(|i| matches!(i, easy_mark::Item::Text(_, _))) {
-                            list_marker_next = None;
-                        }
-                    }
                 }
             }
         }
-        if !current_line_items.is_empty() {
+        // After loop, render any remaining current_line_items
+        // This condition ensures we render if there are items, or if it's an empty line that was quoted or had a list marker.
+        if !current_line_items.is_empty() || list_marker_next.is_some() || quote_level > 0 {
             render_line(
                 ui,
                 &current_line_items,
@@ -100,7 +84,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                 quote_level,
                 &list_marker_next,
                 one_indent_pixels,
-                base_row_height, // Pass base_row_height
+                base_row_height,
             );
         }
     });
@@ -116,57 +100,65 @@ fn render_line(
     base_row_height: f32,
 ) {
     if line_items.is_empty() && list_marker_text.is_none() && quote_level == 0 {
+        // If there are no items, no list marker, and not in a quote, then it's a truly empty line.
+        // Add a small space to represent the blank line visually if desired,
+        // or just return to draw nothing. The vertical layout in easy_mark_it might handle spacing.
+        // For now, let's ensure it doesn't draw a horizontal ui if completely empty.
+        // If we want blank lines to take up space, easy_mark_it's Newline arm could add ui.add_space().
+        // The current Newline arm implicitly does this by ending a line and letting vertical layout space.
         return;
     }
 
-    if !line_items.is_empty() || list_marker_text.is_some() || quote_level > 0 {
-        ui.horizontal(|ui_line| {
-            ui_line.spacing_mut().item_spacing.x = 0.0;
+    // If there's any actual content OR if it's a quoted line (even if otherwise empty) OR a line with just a list marker
+    // The check above already handles the "truly empty and unstyled" case.
+    // So, if we are here, we draw.
 
-            if quote_level > 0 {
-                let bar_color = ui_line.visuals().widgets.noninteractive.fg_stroke.color.gamma_multiply(0.4);
-                let quote_bar_width = 2.0;
-                let quote_bar_total_spacing_per_level = quote_bar_width + 4.0;
+    ui.horizontal(|ui_line| {
+        ui_line.spacing_mut().item_spacing.x = 0.0;
 
-                let total_quote_indent_width = quote_level as f32 * quote_bar_total_spacing_per_level;
+        if quote_level > 0 {
+            let bar_color = ui_line.visuals().widgets.noninteractive.fg_stroke.color.gamma_multiply(0.4);
+            let quote_bar_width = 2.0;
+            let quote_bar_total_spacing_per_level = quote_bar_width + 4.0;
 
-                let (quote_bar_area_rect, _) = ui_line.allocate_exact_size(
-                    egui::vec2(total_quote_indent_width, base_row_height),
-                    Sense::hover()
+            let total_quote_indent_width = quote_level as f32 * quote_bar_total_spacing_per_level;
+
+            let (quote_bar_area_rect, _) = ui_line.allocate_exact_size(
+                egui::vec2(total_quote_indent_width, base_row_height),
+                Sense::hover()
+            );
+
+            for i in 0..quote_level {
+                let bar_x_start = quote_bar_area_rect.min.x + i as f32 * quote_bar_total_spacing_per_level;
+                let rect = egui::Rect::from_min_max(
+                    egui::pos2(bar_x_start, quote_bar_area_rect.min.y),
+                    egui::pos2(bar_x_start + quote_bar_width, quote_bar_area_rect.max.y)
                 );
+                ui_line.painter().rect_filled(rect, 0.0, bar_color);
+            }
+        }
 
-                for i in 0..quote_level {
-                    let bar_x_start = quote_bar_area_rect.min.x + i as f32 * quote_bar_total_spacing_per_level;
-                    let rect = egui::Rect::from_min_max(
-                        egui::pos2(bar_x_start, quote_bar_area_rect.min.y),
-                        egui::pos2(bar_x_start + quote_bar_width, quote_bar_area_rect.max.y)
-                    );
-                    ui_line.painter().rect_filled(rect, 0.0, bar_color);
+        let content_available_width = ui_line.available_width();
+        ui_line.allocate_ui_with_layout(
+            egui::vec2(content_available_width, 0.0),
+            Layout::left_to_right(Align::TOP).with_main_wrap(true),
+            |ui_content| {
+                ui_content.spacing_mut().item_spacing.x = 2.0;
+
+                if indent_level > 0 {
+                    ui_content.add_space(indent_level as f32 * one_indent_pixels);
+                }
+
+                if let Some(marker_text_val) = list_marker_text {
+                    ui_content.label(RichText::new(marker_text_val.as_str()).strong());
+                }
+
+                for item_content in line_items {
+                    item_ui_content(ui_content, *item_content);
                 }
             }
-
-            let content_available_width = ui_line.available_width();
-            ui_line.allocate_ui_with_layout(
-                egui::vec2(content_available_width, 0.0),
-                Layout::left_to_right(Align::TOP).with_main_wrap(true),
-                |ui_content| {
-                    ui_content.spacing_mut().item_spacing.x = 2.0;
-
-                    if indent_level > 0 {
-                        ui_content.add_space(indent_level as f32 * one_indent_pixels);
-                    }
-
-                    if let Some(marker_text_val) = list_marker_text {
-                        ui_content.label(RichText::new(marker_text_val.as_str()).strong());
-                    }
-
-                    for item_content in line_items {
-                        item_ui_content(ui_content, *item_content);
-                    }
-                }
-            );
-        });
-    }
+        );
+    });
 }
 
 pub fn item_ui_content(ui: &mut Ui, item: easy_mark::Item<'_>) {
