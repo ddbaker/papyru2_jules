@@ -37,8 +37,8 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
 
     match item {
         easy_mark::Item::Newline => {
-            // ui.add_space(row_height); // Do nothing visually for Newline in this test
-            println!("Viewer: Processed Newline (doing nothing visually)");
+            ui.allocate_exact_size(egui::vec2(0.0, row_height), egui::Sense::hover()); // Minimal newline
+            println!("Viewer: Processed Newline (using allocate_exact_size)");
         }
         easy_mark::Item::Text(_style, text) => { // Ignoring style for now
             ui.label(text);
