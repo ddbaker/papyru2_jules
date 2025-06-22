@@ -32,26 +32,24 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items: impl Iterator<Item = easy_mark::Ite
 pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
     println!("Viewer: item_ui called for: {:?}", item);
     let row_height = ui.text_style_height(&TextStyle::Body);
-    println!("Viewer: row_height calculated as: {}", row_height);
-    // let one_indent = row_height / 2.0; // Keep this commented for now, not used by simplified items
+    println!("Viewer: row_height calculated as: {}", row_height); // Ensure this is active
+    // let one_indent = row_height / 2.0;
 
     match item {
         easy_mark::Item::Newline => {
-            ui.allocate_exact_size(egui::vec2(0.0, row_height), egui::Sense::hover()); // Minimal newline
+            ui.allocate_exact_size(egui::vec2(0.0, row_height), egui::Sense::hover());
             println!("Viewer: Processed Newline (using allocate_exact_size)");
         }
-        easy_mark::Item::Text(_style, text) => { // Ignoring style for now
-            println!("Viewer: Text item content: '{}', len: {}", text, text.len()); // Debug text
-            ui.label(text);
-            // println!("Viewer: Processed Text: {}", text); // Covered by above
+        easy_mark::Item::Text(style, text) => { // style is captured again
+            println!("---Viewer: ENTERED Text ARM--- for text: '{}', len: {}", text, text.len());
+            ui.label(text); // Still simple ui.label for now
         }
         easy_mark::Item::Separator => {
             ui.add(Separator::default().horizontal());
             println!("Viewer: Processed Separator");
         }
         _ => {
-            // ui.label(format!("Skipped: {:?}", item)); // Optional: for visual feedback
-            println!("Viewer: Skipped item: {:?}", item);
+            println!("---Viewer: ENTERED SKIP ARM--- for item: {:?}", item);
         }
     }
 }
