@@ -75,9 +75,10 @@ impl EasyMarkEditor {
                     .id_salt(egui::Id::new("rendered_scroll_area_v"))
                     .min_scrolled_width(100.0)
                     .min_scrolled_height(200.0) // Keep min height
+                    .auto_shrink([false, false]) // Add auto_shrink here as well
                     // .max_height(ui.available_height() * 0.4) // Can add a max_height here too if needed
                     .show(ui, |ui_viewer| {
-                        super::easy_mark_viewer::easy_mark(ui_viewer, &self.code); // Re-enabled
+                        super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
                     });
             });
 
