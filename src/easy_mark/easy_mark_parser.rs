@@ -358,15 +358,18 @@ impl<'a> Iterator for Parser<'a> {
             }
 
             // Swallow everything up to the next special character:
-            let end = self
-                .s
-                .find(&['*', '`', '~', '_', '/', '$', '^', '\\', '<', '[', '\n'][..])
-                .map_or_else(|| self.s.len(), |special| special.max(1));
+            let find_result = self.s.find(&['*', '`', '~', '_', '/', '$', '^', '\\', '<', '[', '\n'][..]);
+            let end = find_result.unwrap_or(self.s.len()); // Simplified end calculation for now
+
+            println!("[PARSER Swallow] s: '{:?}', find_result: {:?}, calculated_end: {}",
+                     self.s.chars().take(30).collect::<String>(),
+                     find_result,
+                     end);
 
             let item = Item::Text(self.style, &self.s[..end]);
             self.s = &self.s[end..];
             self.start_of_line = false;
-            if let Item::Text(style, text_content) = &item { // Correctly destructure
+            if let Item::Text(style, text_content) = &item {
                  println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", text_content, style);
             }
             return Some(item);
