@@ -195,7 +195,7 @@ impl<'a> Iterator for Parser<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if self.s.is_empty() {
-                println!("Parser: Reached end of input.");
+                // println!("Parser: Reached end of input."); // Silenced for now
                 return None;
             }
             // The following line was intended to be commented out but was active.
@@ -222,7 +222,7 @@ impl<'a> Iterator for Parser<'a> {
                 self.start_of_line = true;
                 self.style = Style::default();
                 let item = Item::Newline;
-                println!("Parser: Yielding Newline: {:?}", item);
+                // println!("Parser: Yielding Newline: {:?}", item); // Silenced for now
                 return Some(item);
             }
 
@@ -239,7 +239,7 @@ impl<'a> Iterator for Parser<'a> {
                 let text = &self.s[1..2];
                 self.s = &self.s[2..];
                 self.start_of_line = false;
-                println!("Parser: Yielding Escaped Text: {:?}", text);
+                // println!("Parser: Yielding Escaped Text: {:?}", text); // Silenced for now
                 return Some(Item::Text(self.style, text));
             }
 
@@ -251,7 +251,7 @@ impl<'a> Iterator for Parser<'a> {
                     self.s = &self.s[length..];
                     self.start_of_line = true; // indentation doesn't count
                     let item = Item::Indentation(length);
-                    println!("Parser: Yielding Indentation: {:?}", item);
+                    // println!("Parser: Yielding Indentation: {:?}", item); // Silenced for now
                     return Some(item);
                 }
 
@@ -269,7 +269,7 @@ impl<'a> Iterator for Parser<'a> {
                     self.start_of_line = true; // quote indentation doesn't count
                     self.style.quoted = true;
                     let item = Item::QuoteIndent;
-                    println!("Parser: Yielding QuoteIndent: {:?}", item);
+                    // println!("Parser: Yielding QuoteIndent: {:?}", item); // Silenced for now
                     return Some(item);
                 }
 
@@ -278,13 +278,13 @@ impl<'a> Iterator for Parser<'a> {
                     self.s = &self.s[2..];
                     self.start_of_line = false;
                     let item = Item::BulletPoint;
-                    println!("Parser: Yielding BulletPoint: {:?}", item);
+                    // println!("Parser: Yielding BulletPoint: {:?}", item); // Silenced for now
                     return Some(item);
                 }
 
                 // `1. `, `42. ` etc.
                 if let Some(item) = self.numbered_list() {
-                    println!("Parser: Yielding NumberedPoint (from helper): {:?}", item);
+                    // println!("Parser: Yielding NumberedPoint (from helper): {:?}", item); // Silenced for now
                     return Some(item);
                 }
 
@@ -294,20 +294,20 @@ impl<'a> Iterator for Parser<'a> {
                     self.s = self.s.strip_prefix('\n').unwrap_or(self.s); // remove trailing newline
                     self.start_of_line = false;
                     let item = Item::Separator;
-                    println!("Parser: Yielding Separator: {:?}", item);
+                    // println!("Parser: Yielding Separator: {:?}", item); // Silenced for now
                     return Some(item);
                 }
 
                 // ```{language}\n{code}``` <--- This comment describes the code block structure
                 if let Some(item) = self.code_block() {
-                    println!("Parser: Yielding CodeBlock (from helper): {:?}", item);
+                    // println!("Parser: Yielding CodeBlock (from helper): {:?}", item); // Silenced for now
                     return Some(item);
                 }
             }
 
             // `code`
             if let Some(item) = self.inline_code() {
-                println!("Parser: Yielding Text (from inline_code helper): {:?}", item);
+                // println!("Parser: Yielding Text (from inline_code helper): {:?}", item); // Silenced for now
                 return Some(item);
             }
 
@@ -350,7 +350,7 @@ impl<'a> Iterator for Parser<'a> {
 
             // `<url>` or `[link](url)`
             if let Some(item) = self.url() {
-                println!("Parser: Yielding Hyperlink (from url helper): {:?}", item);
+                // println!("Parser: Yielding Hyperlink (from url helper): {:?}", item); // Silenced for now
                 return Some(item);
             }
 
@@ -363,7 +363,7 @@ impl<'a> Iterator for Parser<'a> {
             let item = Item::Text(self.style, &self.s[..end]);
             self.s = &self.s[end..];
             self.start_of_line = false;
-            println!("Parser: Yielding Text (default): {:?}", item);
+            // println!("Parser: Yielding Text (default): {:?}", item); // Silenced for now
             return Some(item);
         }
     }
