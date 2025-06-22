@@ -47,23 +47,23 @@ impl EasyMarkEditor {
         if self.show_rendered {
             let available_height = ui.available_height(); // Calculate *before* columns closure
             ui.columns(2, |columns| {
-                // Column 0: Rendered View (Left)
+                // Column 0: Editor (Left)
                 ScrollArea::vertical()
-                    .id_salt(egui::Id::new("rendered_scroll_area_side"))
-                    .min_scrolled_width(100.0)
-                    .min_scrolled_height(available_height) // Use pre-calculated value
+                    .id_salt(egui::Id::new("editor_scroll_area_side"))  // Swapped content
+                    .min_scrolled_height(available_height)
                     .auto_shrink([false, false])
-                    .show(&mut columns[0], |ui_viewer| {
-                        super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
+                    .show(&mut columns[0], |ui_editor| { // columns[0] is now editor
+                        self.editor_ui(ui_editor);
                     });
 
-                // Column 1: Editor (Right)
+                // Column 1: Rendered View (Right)
                 ScrollArea::vertical()
-                    .id_salt(egui::Id::new("editor_scroll_area_side"))
-                    .min_scrolled_height(available_height) // Use pre-calculated value
+                    .id_salt(egui::Id::new("rendered_scroll_area_side")) // Swapped content
+                    .min_scrolled_width(100.0)
+                    .min_scrolled_height(available_height)
                     .auto_shrink([false, false])
-                    .show(&mut columns[1], |ui_editor| {
-                        self.editor_ui(ui_editor);
+                    .show(&mut columns[1], |ui_viewer| { // columns[1] is now viewer
+                        super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
                     });
             });
         } else {
