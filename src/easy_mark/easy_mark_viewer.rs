@@ -16,7 +16,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
 
     let base_row_height = ui.text_style_height(&TextStyle::Body);
     let one_indent_pixels = base_row_height * 1.5;
-    let quote_marker = "> ";
+    // quote_marker string removed, will draw graphically
 
     let mut current_line_items: Vec<easy_mark::Item> = Vec::new();
     let mut items = items_iter.peekable();
@@ -25,7 +25,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
         ui.spacing_mut().item_spacing.y = ui.spacing().item_spacing.y * 0.5;
 
         while let Some(item) = items.next() {
-            // println!("Viewer (easy_mark_it): Processing Item: {:?}", item); // [JULES] Commented out
+            // println!("Viewer (easy_mark_it): Processing Item: {:?}", item);
             match item {
                 easy_mark::Item::Indentation(level) => indent_level = level,
                 easy_mark::Item::QuoteIndent => quote_level += 1,
@@ -39,7 +39,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                         quote_level,
                         &list_marker_next,
                         one_indent_pixels,
-                        quote_marker,
+                        base_row_height, // Pass base_row_height
                     );
                     current_line_items.clear();
                     indent_level = 0;
@@ -55,7 +55,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                             quote_level,
                             &list_marker_next,
                             one_indent_pixels,
-                            quote_marker,
+                            base_row_height, // Pass base_row_height
                         );
                         current_line_items.clear();
                     }
@@ -82,7 +82,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                             quote_level,
                             &list_marker_next,
                             one_indent_pixels,
-                            quote_marker,
+                            base_row_height, // Pass base_row_height
                         );
                         current_line_items.clear();
                         if list_marker_next.is_some() && !current_line_items.iter().any(|i| matches!(i, easy_mark::Item::Text(_, _))) {
@@ -100,7 +100,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
                 quote_level,
                 &list_marker_next,
                 one_indent_pixels,
-                quote_marker,
+                base_row_height, // Pass base_row_height
             );
         }
     });
@@ -113,38 +113,67 @@ fn render_line(
     quote_level: u8,
     list_marker_text: &Option<String>,
     one_indent_pixels: f32,
-    quote_marker_str: &str,
+    base_row_height: f32,
 ) {
     if line_items.is_empty() && list_marker_text.is_none() && quote_level == 0 {
         return;
     }
 
-    ui.horizontal_wrapped(|ui| {
-        if quote_level > 0 {
-            ui.label(RichText::new(quote_marker_str.repeat(quote_level as usize)).weak());
-            ui.add_space(2.0);
-        }
+    if !line_items.is_empty() || list_marker_text.is_some() || quote_level > 0 {
+        ui.horizontal(|ui_line| {
+            ui_line.spacing_mut().item_spacing.x = 0.0;
 
-        if indent_level > 0 {
-            ui.add_space(indent_level as f32 * one_indent_pixels);
-        }
+            if quote_level > 0 {
+                let bar_color = ui_line.visuals().widgets.noninteractive.fg_stroke.color.gamma_multiply(0.4);
+                let quote_bar_width = 2.0;
+                let quote_bar_total_spacing_per_level = quote_bar_width + 4.0;
 
-        if let Some(marker_text_val) = list_marker_text {
-            ui.label(RichText::new(marker_text_val.as_str()).strong());
-            ui.add_space(2.0);
-        }
+                let total_quote_indent_width = quote_level as f32 * quote_bar_total_spacing_per_level;
 
-        for item_content in line_items {
-            item_ui_content(ui, *item_content);
-        }
-    });
+                let (quote_bar_area_rect, _) = ui_line.allocate_exact_size(
+                    egui::vec2(total_quote_indent_width, base_row_height),
+                    Sense::hover()
+                );
+
+                for i in 0..quote_level {
+                    let bar_x_start = quote_bar_area_rect.min.x + i as f32 * quote_bar_total_spacing_per_level;
+                    let rect = egui::Rect::from_min_max(
+                        egui::pos2(bar_x_start, quote_bar_area_rect.min.y),
+                        egui::pos2(bar_x_start + quote_bar_width, quote_bar_area_rect.max.y)
+                    );
+                    ui_line.painter().rect_filled(rect, 0.0, bar_color);
+                }
+            }
+
+            let content_available_width = ui_line.available_width();
+            ui_line.allocate_ui_with_layout(
+                egui::vec2(content_available_width, 0.0),
+                Layout::left_to_right(Align::TOP).with_main_wrap(true),
+                |ui_content| {
+                    ui_content.spacing_mut().item_spacing.x = 2.0;
+
+                    if indent_level > 0 {
+                        ui_content.add_space(indent_level as f32 * one_indent_pixels);
+                    }
+
+                    if let Some(marker_text_val) = list_marker_text {
+                        ui_content.label(RichText::new(marker_text_val.as_str()).strong());
+                    }
+
+                    for item_content in line_items {
+                        item_ui_content(ui_content, *item_content);
+                    }
+                }
+            );
+        });
+    }
 }
 
 pub fn item_ui_content(ui: &mut Ui, item: easy_mark::Item<'_>) {
-    // println!("Viewer (item_ui_content): Processing Item: {:?}", item); // [JULES] Commented out
+    // println!("Viewer (item_ui_content): Processing Item: {:?}", item);
     match item {
         easy_mark::Item::Text(style, text) => {
-            // println!("---Viewer: Item is Text--- style: {:?}, content: '{}', len: {}", style, text, text.len()); // [JULES] Commented out
+            // println!("---Viewer: Item is Text--- style: {:?}, content: '{}', len: {}", style, text, text.len());
             if text.trim().is_empty() && !text.contains('\n') {
                  ui.allocate_exact_size(vec2(0.0, 0.0), Sense::hover());
             } else {
@@ -152,9 +181,8 @@ pub fn item_ui_content(ui: &mut Ui, item: easy_mark::Item<'_>) {
                 ui.label(label);
             }
         }
-        // Separator is handled by easy_mark_it now
         easy_mark::Item::Hyperlink(style, text, url) => {
-            // println!("---Viewer: Item is Hyperlink--- Text: '{}', URL: '{}', Style: {:?}", text, url, style); // [JULES] Commented out
+            // println!("---Viewer: Item is Hyperlink--- Text: '{}', URL: '{}', Style: {:?}", text, url, style);
             let mut rich_text = rich_text_from_style(text, &style);
             if !style.underline {
                 rich_text = rich_text.underline();
@@ -162,7 +190,7 @@ pub fn item_ui_content(ui: &mut Ui, item: easy_mark::Item<'_>) {
             ui.add(egui::Hyperlink::from_label_and_url(rich_text, url));
         }
         easy_mark::Item::CodeBlock(_language, code) => {
-            // println!("---Viewer: Item is CodeBlock--- Code: '{}'", code); // [JULES] Commented out
+            // println!("---Viewer: Item is CodeBlock--- Code: '{}'", code);
             egui::Frame::group(ui.style())
                 .fill(ui.visuals().code_bg_color)
                 .show(ui, |ui| {
