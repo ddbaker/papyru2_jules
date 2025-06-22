@@ -10,8 +10,8 @@ pub fn easy_mark(ui: &mut Ui, easy_mark_str: &str) { // Renamed easy_mark to eas
 }
 
 pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark::Item<'em>>) {
-    let mut indent_level: u8 = 0;
-    let mut quote_level: u8 = 0;
+    let mut indent_level: usize = 0; // Changed u8 to usize
+    let mut quote_level: u8 = 0; // quote_level can remain u8 for now, typically not that deep
     let mut list_marker_next: Option<String> = None;
 
     let base_row_height = ui.text_style_height(&TextStyle::Body);
@@ -103,7 +103,7 @@ pub fn easy_mark_it<'em>(ui: &mut Ui, items_iter: impl Iterator<Item = easy_mark
 fn render_line(
     ui: &mut Ui,
     line_items: &[easy_mark::Item],
-    indent_level: u8,
+    indent_level: usize, // Changed u8 to usize
     quote_level: u8,
     list_marker_text: &Option<String>, // Changed name for clarity
     one_indent_pixels: f32,
