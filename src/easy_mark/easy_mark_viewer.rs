@@ -46,8 +46,7 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
             ui.label(label);
         }
     } else {
-        // For this test, other items do nothing visually and are not explicitly logged by item_ui's match
-        // They will still be logged by the "Viewer: item_ui called for: {:?}" line above.
+        println!("---Viewer: Item is NOT Text, SKIPPING visual render--- item: {:?}", item);
     }
 }
 

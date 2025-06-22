@@ -257,6 +257,7 @@ impl<'a> Iterator for Parser<'a> {
 
                 // # Heading
                 if let Some(after) = self.s.strip_prefix("# ") {
+                    println!("[PARSER #] Detected heading. Text after '# ': '{}'", after);
                     self.s = after;
                     self.start_of_line = false;
                     self.style.heading = true;
@@ -363,7 +364,7 @@ impl<'a> Iterator for Parser<'a> {
             let item = Item::Text(self.style, &self.s[..end]);
             self.s = &self.s[end..];
             self.start_of_line = false;
-            // println!("Parser: Yielding Text (default): {:?}", item); // Silenced for now
+            println!("[PARSER Text] Yielding Text (default): content='{}', style={:?}", item.1, item.0);
             return Some(item);
         }
     }
