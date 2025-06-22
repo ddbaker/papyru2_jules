@@ -257,13 +257,18 @@ impl<'a> Iterator for Parser<'a> {
                 }
 
                 // # Heading
-                if let Some(after) = self.s.strip_prefix("# ") {
-                    // Moved println to the top of the block
-                    println!("[PARSER #] Detected heading. `self.s` (before strip): '{:?}', `after`: '{:?}'", self.s.chars().take(30).collect::<String>(), after.chars().take(30).collect::<String>());
-                    self.s = after;
-                    self.start_of_line = false;
-                    self.style.heading = true;
-                    continue;
+                if let Some(s_after_hash) = self.s.strip_prefix('#') {
+                    // Check for common whitespace (space or tab)
+                    if !s_after_hash.is_empty() && (s_after_hash.starts_with(' ') || s_after_hash.starts_with('\t')) {
+                        let after_trimmed_whitespace = s_after_hash.trim_start();
+                        println!("[PARSER #] Detected heading. `s_after_hash`: '{:?}', `after_trimmed_whitespace`: '{:?}'",
+                                 s_after_hash.chars().take(30).collect::<String>(),
+                                 after_trimmed_whitespace.chars().take(30).collect::<String>());
+                        self.s = after_trimmed_whitespace;
+                        self.start_of_line = false;
+                        self.style.heading = true;
+                        continue;
+                    }
                 }
 
                 // > quote
