@@ -34,30 +34,31 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
     let row_height = ui.text_style_height(&TextStyle::Body);
     println!("Viewer: row_height calculated as: {}", row_height);
 
-    ui.label("ITEM PROCESSED"); // Simplified output for every item
+    // ui.label("ITEM PROCESSED"); // Remove simplified output
 
-    // Original match statement and logic commented out for this test:
-    // let one_indent = row_height / 2.0;
-    // match item {
-    //     easy_mark::Item::Newline => {
-    //         // ui.label("\n"); // too much spacing (paragraph spacing)
-    //         ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // make sure we take up some height
-    //         ui.end_row();
-    //         ui.set_row_height(row_height);
-    //     }
-    //     easy_mark::Item::Text(style, text) => {
-    //         let label = rich_text_from_style(text, &style);
-    //         if style.small && !style.raised {
-    //             ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
-    //                 ui.set_min_height(row_height);
-    //                 ui.label(label);
-    //             });
-    //         } else {
-    //             ui.label(label);
-    //         }
-    //     }
-    //     // ... and so on for all other item types
-    // };
+    let one_indent = row_height / 2.0;
+    match item {
+        easy_mark::Item::Newline => {
+            // ui.label("\n"); // too much spacing (paragraph spacing)
+            ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover()); // make sure we take up some height
+            ui.end_row();
+            ui.set_row_height(row_height);
+            println!("Viewer: Processed Newline");
+        }
+        easy_mark::Item::Text(style, text) => {
+            // For now, only render simple text, ignore styles
+            ui.label(text);
+            println!("Viewer: Processed Text: {}", text);
+        }
+        easy_mark::Item::Separator => {
+            ui.add(Separator::default().horizontal());
+            println!("Viewer: Processed Separator");
+        }
+        // Other item types will do nothing for now
+        _ => {
+            println!("Viewer: Skipped item: {:?}", item);
+        }
+    };
 }
 
 fn rich_text_from_style(text: &str, style: &easy_mark::Style) -> RichText {
