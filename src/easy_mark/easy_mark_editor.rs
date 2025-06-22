@@ -35,7 +35,7 @@ impl EasyMarkEditor {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         egui::Grid::new("controls").show(ui, |ui| {
             let _response = ui.button("Hotkeys").on_hover_ui(nested_hotkeys_ui);
-            ui.checkbox(&mut self.show_rendered, "TEST Show rendered TEST");
+            ui.checkbox(&mut self.show_rendered, "TEST Show rendered TEST"); // Label might need update
             ui.checkbox(&mut self.highlight_editor, "Highlight editor");
             if ui.button("Reset").clicked() {
                 *self = Default::default();
@@ -45,48 +45,34 @@ impl EasyMarkEditor {
         ui.separator();
 
         if self.show_rendered {
-            // ui.columns(2, |columns| {
-            //     ScrollArea::vertical().id_salt(egui::Id::new("editor_scroll_area"))
-            //         .show(&mut columns[0], |ui| self.editor_ui(ui));
-            //     ScrollArea::vertical()
-            //         .id_salt(egui::Id::new("rendered_scroll_area"))
-            //         .min_scrolled_width(100.0)
-            //         .min_scrolled_height(100.0)
-            //         .show(&mut columns[1], |ui| {
-            //             super::easy_mark_viewer::easy_mark(ui, &self.code);
-            //         });
-            // });
-
-            // EXPERIMENTAL: Simple vertical layout
-            ui.vertical(|ui| {
-                ui.label("EDITOR AREA (Scrollable):");
+            ui.columns(2, |columns| {
+                // Column 0: Rendered View (Left)
                 ScrollArea::vertical()
-                    .id_salt(egui::Id::new("editor_scroll_area_v"))
-                    .min_scrolled_height(200.0)
-                    .max_height(ui.available_height() * 0.6) // Try capping editor ScrollArea height
-                    .auto_shrink([false, false])
-                    .show(ui, |ui_editor| {
-                        self.editor_ui(ui_editor);
-                    });
-
-                ui.separator();
-                ui.label("RENDERED AREA (Scrollable):"); // Restored label
-                ScrollArea::vertical()
-                    .id_salt(egui::Id::new("rendered_scroll_area_v"))
+                    .id_salt(egui::Id::new("rendered_scroll_area_side"))
                     .min_scrolled_width(100.0)
-                    .min_scrolled_height(200.0) // Keep min height
-                    .auto_shrink([false, false]) // Add auto_shrink here as well
-                    // .max_height(ui.available_height() * 0.4) // Can add a max_height here too if needed
-                    .show(ui, |ui_viewer| {
+                    .min_scrolled_height(ui.available_height())
+                    .auto_shrink([false, false])
+                    .show(&mut columns[0], |ui_viewer| {
                         super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
                     });
-            });
 
+                // Column 1: Editor (Right)
+                ScrollArea::vertical()
+                    .id_salt(egui::Id::new("editor_scroll_area_side"))
+                    .min_scrolled_height(ui.available_height())
+                    .auto_shrink([false, false])
+                    .show(&mut columns[1], |ui_editor| {
+                        self.editor_ui(ui_editor);
+                    });
+            });
         } else {
+            // Single panel for editor only
             ScrollArea::vertical()
                 .id_salt(egui::Id::new("editor_scroll_area_single"))
-                .auto_shrink([false, true])
-                .show(ui, |ui| self.editor_ui(ui));
+                .auto_shrink([false, false]) // Ensure it expands fully
+                .show(ui, |ui_editor| {
+                    self.editor_ui(ui_editor);
+                });
         }
     }
 
@@ -104,14 +90,12 @@ impl EasyMarkEditor {
 
             let text_edit = egui::TextEdit::multiline(code)
                 .desired_width(f32::INFINITY)
-                // .desired_height(ui.available_height()) // Removed erroneous call
-                .font(egui::TextStyle::Monospace) // for cursor height
+                .font(egui::TextStyle::Monospace)
                 .layouter(&mut layouter);
             ui.add(text_edit)
         } else {
             let text_edit = egui::TextEdit::multiline(code)
                 .desired_width(f32::INFINITY);
-                // .desired_height(ui.available_height()); // Removed erroneous call
             ui.add(text_edit)
         };
     }
@@ -120,14 +104,14 @@ impl EasyMarkEditor {
 pub const SHORTCUT_BOLD: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::B);
 pub const SHORTCUT_CODE: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::N);
 pub const SHORTCUT_ITALICS: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::I);
-pub const SHORTCUT_SUBSCRIPT: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::L);
-pub const SHORTCUT_SUPERSCRIPT: KeyboardShortcut =
+pub const SHORTCUT_SUBSCRIPT: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::L); // Assuming $ for subscript
+pub const SHORTCUT_SUPERSCRIPT: KeyboardShortcut = // Assuming ^ for superscript
     KeyboardShortcut::new(Modifiers::COMMAND, Key::Y);
 pub const SHORTCUT_STRIKETHROUGH: KeyboardShortcut =
-    KeyboardShortcut::new(Modifiers::CTRL.plus(Modifiers::SHIFT), Key::Q);
+    KeyboardShortcut::new(Modifiers::CTRL.plus(Modifiers::SHIFT), Key::Q); // Assuming ~
 pub const SHORTCUT_UNDERLINE: KeyboardShortcut =
-    KeyboardShortcut::new(Modifiers::CTRL.plus(Modifiers::SHIFT), Key::W);
-pub const SHORTCUT_INDENT: KeyboardShortcut =
+    KeyboardShortcut::new(Modifiers::CTRL.plus(Modifiers::SHIFT), Key::W); // Assuming _
+pub const SHORTCUT_INDENT: KeyboardShortcut = // Placeholder, actual indent/outdent might be different
     KeyboardShortcut::new(Modifiers::CTRL.plus(Modifiers::SHIFT), Key::E);
 
 fn nested_hotkeys_ui(ui: &mut egui::Ui) {
@@ -141,11 +125,13 @@ fn nested_hotkeys_ui(ui: &mut egui::Ui) {
         label(SHORTCUT_BOLD, "*bold*");
         label(SHORTCUT_CODE, "`code`");
         label(SHORTCUT_ITALICS, "/italics/");
-        label(SHORTCUT_SUBSCRIPT, "$subscript$");
-        label(SHORTCUT_SUPERSCRIPT, "^superscript^");
+        // Assuming $ for subscript based on EasyMark example, adjust if different
+        label(SHORTCUT_SUBSCRIPT, "$small$"); // Or what $ represents if not subscript
+        // Assuming ^ for superscript
+        label(SHORTCUT_SUPERSCRIPT, "^raised^"); // Or what ^ represents if not superscript
         label(SHORTCUT_STRIKETHROUGH, "~strikethrough~");
         label(SHORTCUT_UNDERLINE, "_underline_");
-        label(SHORTCUT_INDENT, "two spaces"); // Placeholder for tab indent
+        label(SHORTCUT_INDENT, "two spaces");
     });
 }
 
@@ -165,8 +151,8 @@ fn shortcuts(ui: &Ui, code: &mut dyn TextBuffer, ccursor_range: &mut CCursorRang
         (SHORTCUT_BOLD, "*"),
         (SHORTCUT_CODE, "`"),
         (SHORTCUT_ITALICS, "/"),
-        (SHORTCUT_SUBSCRIPT, "$"),
-        (SHORTCUT_SUPERSCRIPT, "^"),
+        (SHORTCUT_SUBSCRIPT, "$"), // Assuming $
+        (SHORTCUT_SUPERSCRIPT, "^"), // Assuming ^
         (SHORTCUT_STRIKETHROUGH, "~"),
         (SHORTCUT_UNDERLINE, "_"),
     ] {
