@@ -70,16 +70,15 @@ impl EasyMarkEditor {
                     });
 
                 ui.separator();
-                ui.label("RENDERED AREA LABEL TEST:");
-                ui.label("If you see this, the vertical layout is working past the separator.");
-                // ScrollArea::vertical()
-                //     .id_salt(egui::Id::new("rendered_scroll_area_v"))
-                //     .min_scrolled_width(100.0)
-                //     .min_scrolled_height(200.0) // Give viewer some min height
-                //     .show(ui, |ui| {
-                //         // super::easy_mark_viewer::easy_mark(ui, &self.code); // Temporarily disabled
-                //         ui.label("Content inside ScrollArea for RENDERED AREA");
-                //     });
+                ui.label("RENDERED AREA (Scrollable):"); // Restored label
+                ScrollArea::vertical()
+                    .id_salt(egui::Id::new("rendered_scroll_area_v"))
+                    .min_scrolled_width(100.0)
+                    .min_scrolled_height(200.0) // Keep min height
+                    // .max_height(ui.available_height() * 0.4) // Can add a max_height here too if needed
+                    .show(ui, |ui_viewer| {
+                        super::easy_mark_viewer::easy_mark(ui_viewer, &self.code); // Re-enabled
+                    });
             });
 
         } else {
