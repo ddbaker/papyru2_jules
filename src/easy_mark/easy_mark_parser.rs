@@ -194,6 +194,7 @@ impl<'a> Iterator for Parser<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
+            println!("[PARSER LoopTop] s: '{:?}', start_of_line: {}", self.s.chars().take(30).collect::<String>(), self.start_of_line);
             if self.s.is_empty() {
                 // println!("Parser: Reached end of input."); // Silenced for now
                 return None;
