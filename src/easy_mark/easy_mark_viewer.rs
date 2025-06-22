@@ -1,7 +1,6 @@
 use super::easy_mark_parser as easy_mark;
 use egui::{
-    vec2, Align, Align2, Hyperlink, Layout, Response, RichText, Sense, Separator, Shape, TextStyle,
-    Ui,
+    vec2, Align, Align2, Layout, Response, RichText, Sense, TextStyle, Ui, // Removed Hyperlink, Separator, Shape
 };
 
 /// Parse and display a VERY simple and small subset of Markdown.
@@ -245,29 +244,4 @@ fn rich_text_from_style(text: &str, style: &easy_mark::Style) -> RichText {
     rich_text
 }
 
-fn bullet_point(ui: &mut Ui, width: f32) -> Response {
-    let row_height = ui.text_style_height(&TextStyle::Body);
-    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense::hover());
-    ui.painter().circle_filled(
-        rect.center(),
-        rect.height() / 8.0,
-        ui.visuals().strong_text_color(),
-    );
-    response
-}
-
-fn numbered_point(ui: &mut Ui, width: f32, number: &str) -> Response {
-    let font_id = TextStyle::Body.resolve(ui.style());
-    let row_height = ui.fonts(|f| f.row_height(&font_id));
-    let (rect, response) = ui.allocate_exact_size(vec2(width, row_height), Sense::hover());
-    let text = format!("{number}.");
-    let text_color = ui.visuals().strong_text_color();
-    ui.painter().text(
-        rect.right_center(),
-        Align2::RIGHT_CENTER,
-        text,
-        font_id,
-        text_color,
-    );
-    response
-}
+// [JULES] fn bullet_point and fn numbered_point removed as they are unused.

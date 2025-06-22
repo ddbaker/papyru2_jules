@@ -214,10 +214,10 @@ impl<'a> Iterator for Parser<'a> {
         // If we reach here, either start_of_line was false, or it was true but no line-start token was found.
         // For the latter case, we now consider it as the start of a regular text segment.
         // This ensures that plain lines like "EasyMark is a markup language" are processed by text swallowing.
-        let mut just_set_start_of_line_false = false;
+        // let mut just_set_start_of_line_false = false; // [JULES] Removed unused variable
         if self.start_of_line {
              self.start_of_line = false;
-             just_set_start_of_line_false = true; // Mark that we did this, to potentially avoid style toggles on first char
+             // just_set_start_of_line_false = true; // [JULES] Removed unused variable assignment
         }
 
 
