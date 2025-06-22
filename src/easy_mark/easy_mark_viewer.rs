@@ -36,7 +36,7 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
     // let one_indent = row_height / 2.0;
 
     if let easy_mark::Item::Text(style, text) = item {
-        println!("---Viewer: Item is Text--- content: '{}', len: {}", text, text.len());
+        println!("---Viewer: Item is Text--- style: {:?}, content: '{}', len: {}", style, text, text.len());
         if text.trim().is_empty() {
             println!("---Viewer: Text is whitespace, allocating space to make it visible if it were the only issue.");
             // Allocate some space for purely whitespace text to see if it's a "draws nothing" issue

@@ -258,7 +258,8 @@ impl<'a> Iterator for Parser<'a> {
 
                 // # Heading
                 if let Some(after) = self.s.strip_prefix("# ") {
-                    println!("[PARSER #] Detected heading. Text after '# ': '{}'", after);
+                    // Moved println to the top of the block
+                    println!("[PARSER #] Detected heading. `self.s` (before strip): '{:?}', `after`: '{:?}'", self.s.chars().take(30).collect::<String>(), after.chars().take(30).collect::<String>());
                     self.s = after;
                     self.start_of_line = false;
                     self.style.heading = true;
