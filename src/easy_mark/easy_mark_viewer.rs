@@ -37,12 +37,8 @@ pub fn item_ui(ui: &mut Ui, item: easy_mark::Item<'_>) {
 
     match item {
         easy_mark::Item::Newline => {
-            ui.add_space(row_height); // Simpler newline handling
-            // The old way:
-            // ui.allocate_exact_size(vec2(0.0, row_height), Sense::hover());
-            // ui.end_row();
-            // ui.set_row_height(row_height);
-            println!("Viewer: Processed Newline (using add_space)");
+            // ui.add_space(row_height); // Do nothing visually for Newline in this test
+            println!("Viewer: Processed Newline (doing nothing visually)");
         }
         easy_mark::Item::Text(_style, text) => { // Ignoring style for now
             ui.label(text);
