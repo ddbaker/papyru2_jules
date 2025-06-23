@@ -20,6 +20,7 @@ author: "Donarno.Dan.Baker"
 - **Rust version**: rustc 1.87.0 (17067e9ac 2025-05-09)
 - **`Cargo.toml` Parser**: A structured tool to read and programmatically modify the `Cargo.toml` file, reducing the risk of syntax errors.
 - **Rust Documentation Search**: A RAG (Retrieval-Augmented Generation) tool that searches `doc.rust-lang.org`, `crates.io`, and popular Rust blogs for relevant information and best practices.
+- **egui carate API and EasyMark Editor Source code Search**: A RAG (Retrieval-Augmented Generation) tool that searches `https://docs.rs/egui/latest/egui/` and example code in `https://github.com/emilk/egui/tree/main/crates/egui_demo_lib/src/easy_mark`.
 - **bevy carate API Document Search**: A RAG (Retrieval-Augmented Generation) tool that searches `https://docs.rs/bevy/latest/bevy/` and example code in `https://github.com/bevyengine/bevy/tree/main/examples`.
 - **bevy_egui carate API Document Search**: A RAG (Retrieval-Augmented Generation) tool that searches `https://docs.rs/bevy_egui/latest/bevy_egui/` and example code in `https://github.com/vladbat00/bevy_egui/tree/main/examples`.
 
