@@ -35,7 +35,7 @@ impl EasyMarkEditor {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         egui::Grid::new("controls").show(ui, |ui| {
             let _response = ui.button("Hotkeys").on_hover_ui(nested_hotkeys_ui);
-            ui.checkbox(&mut self.show_rendered, "TEST Show rendered TEST"); // Label might need update
+            ui.checkbox(&mut self.show_rendered, "Show rendered"); // Label might need update
             ui.checkbox(&mut self.highlight_editor, "Highlight editor");
             if ui.button("Reset").clicked() {
                 *self = Default::default();
@@ -204,6 +204,7 @@ WARNING: EasyMark is still an evolving specification,
 and is also missing some features.
 ```
 ----------------
+
 # At a glance
 - inline text:
   - normal, `code`, *strong*, ~strikethrough~, _underline_, /italics/, ^raised^, $small$
