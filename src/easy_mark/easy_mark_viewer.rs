@@ -1,4 +1,5 @@
 use super::easy_mark_parser as easy_mark;
+use bevy_egui::{egui};
 use egui::{
     vec2, Align, Layout, RichText, Sense, TextStyle, Ui, // Removed Hyperlink, Separator, Shape
 };
