@@ -1,7 +1,6 @@
 // This file will contain the IME functionality.
 // Based on https://github.com/8bitTD/bevy_egui_ime
 
-use bevy_egui::egui;
 use bevy::prelude::*;
 
 #[derive(Debug, Resource)]
@@ -250,7 +249,7 @@ mod tests {
         let preedit_event = Ime::Preedit {
             value: "preedit".to_string(),
             cursor: Some((0, 1)), // Dummy cursor value
-            window_id: bevy::window::WindowId::primary(), // Dummy window ID
+            window: bevy::ecs::entity::Entity::PLACEHOLDER, // Dummy window ID
         };
         ime_text.listen_ime_event(&preedit_event);
 
@@ -265,7 +264,7 @@ mod tests {
 
         let commit_event = Ime::Commit {
             value: "commit".to_string(),
-            window_id: bevy::window::WindowId::primary(),
+            window: bevy::ecs::entity::Entity::PLACEHOLDER,
         };
         ime_text.listen_ime_event(&commit_event);
 
@@ -283,7 +282,7 @@ mod tests {
 
         let commit_event = Ime::Commit {
             value: "beautiful ".to_string(),
-            window_id: bevy::window::WindowId::primary(),
+            window: bevy::ecs::entity::Entity::PLACEHOLDER,
         };
         ime_text.listen_ime_event(&commit_event);
 
@@ -300,7 +299,7 @@ mod tests {
 
         let commit_event = Ime::Commit {
             value: " world".to_string(),
-            window_id: bevy::window::WindowId::primary(),
+            window: bevy::ecs::entity::Entity::PLACEHOLDER,
         };
         ime_text.listen_ime_event(&commit_event);
 
@@ -325,7 +324,7 @@ mod tests {
         let preedit_event = Ime::Preedit {
             value: "test".to_string(),
             cursor: Some((0, 1)),
-            window_id: bevy::window::WindowId::primary(),
+            window: bevy::ecs::entity::Entity::PLACEHOLDER,
         };
         ime_manager.listen_ime_event(&preedit_event);
 
@@ -342,11 +341,11 @@ mod tests {
         let mut ime_text = create_test_ime_text();
         ime_text.is_focus = true;
 
-        let enabled_event = Ime::Enabled { window_id: bevy::window::WindowId::primary() };
+        let enabled_event = Ime::Enabled { window: bevy::ecs::entity::Entity::PLACEHOLDER };
         ime_text.listen_ime_event(&enabled_event);
         assert!(ime_text.is_ime);
 
-        let disabled_event = Ime::Disabled { window_id: bevy::window::WindowId::primary() };
+        let disabled_event = Ime::Disabled { window: bevy::ecs::entity::Entity::PLACEHOLDER };
         ime_text.listen_ime_event(&disabled_event);
         assert!(!ime_text.is_ime);
     }
