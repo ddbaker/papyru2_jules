@@ -7,7 +7,7 @@ use egui::{
 #[cfg_attr(feature = "serde", serde(default))]
 pub struct EasyMarkEditor {
     pub code: String,
-    highlight_editor: bool,
+    pub highlight_editor: bool, // Made public
     show_rendered: bool,
 
     #[cfg_attr(feature = "serde", serde(skip))]
@@ -33,10 +33,17 @@ impl Default for EasyMarkEditor {
 }
 
 impl EasyMarkEditor {
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
+    // Modified to accept ImeManager and egui::Context from ui_system
+    pub fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        ime_manager: &mut crate::ime::ImeManager,
+        ctx: &egui::Context,
+        // highlighter and highlight_editor are part of self
+    ) {
         egui::Grid::new("controls").show(ui, |ui| {
             let _response = ui.button("Hotkeys").on_hover_ui(nested_hotkeys_ui);
-            ui.checkbox(&mut self.show_rendered, "Show rendered"); // Label might need update
+            ui.checkbox(&mut self.show_rendered, "Show rendered");
             ui.checkbox(&mut self.highlight_editor, "Highlight editor");
             if ui.button("Reset").clicked() {
                 *self = Default::default();
@@ -46,60 +53,52 @@ impl EasyMarkEditor {
         ui.separator();
 
         if self.show_rendered {
-            let available_height = ui.available_height(); // Calculate *before* columns closure
+            let available_height = ui.available_height();
             ui.columns(2, |columns| {
-                // Column 0: Editor (Left)
                 ScrollArea::vertical()
-                    .id_salt(egui::Id::new("editor_scroll_area_side"))  // Swapped content
+                    .id_salt(egui::Id::new("editor_scroll_area_side"))
                     .min_scrolled_height(available_height)
                     .auto_shrink([false, false])
-                    .show(&mut columns[0], |ui_editor| { // columns[0] is now editor
-                        self.editor_ui(ui_editor);
+                    .show(&mut columns[0], |ui_editor| {
+                        self.editor_ui(ui_editor, ime_manager, ctx); // Pass down
                     });
 
-                // Column 1: Rendered View (Right)
                 ScrollArea::vertical()
-                    .id_salt(egui::Id::new("rendered_scroll_area_side")) // Swapped content
+                    .id_salt(egui::Id::new("rendered_scroll_area_side"))
                     .min_scrolled_width(100.0)
                     .min_scrolled_height(available_height)
                     .auto_shrink([false, false])
-                    .show(&mut columns[1], |ui_viewer| { // columns[1] is now viewer
+                    .show(&mut columns[1], |ui_viewer| {
                         super::easy_mark_viewer::easy_mark(ui_viewer, &self.code);
                     });
             });
         } else {
-            // Single panel for editor only
             ScrollArea::vertical()
                 .id_salt(egui::Id::new("editor_scroll_area_single"))
-                .auto_shrink([false, false]) // Ensure it expands fully
+                .auto_shrink([false, false])
                 .show(ui, |ui_editor| {
-                    self.editor_ui(ui_editor);
+                    self.editor_ui(ui_editor, ime_manager, ctx); // Pass down
                 });
         }
     }
 
-    fn editor_ui(&mut self, ui: &mut egui::Ui) {
-        let Self {
-            code, highlighter, ..
-        } = self;
-
-        let _response = if self.highlight_editor {
-            let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
-                let mut layout_job = highlighter.highlight(ui.style(), string);
-                layout_job.wrap.max_width = wrap_width;
-                ui.fonts(|f| f.layout_job(layout_job))
-            };
-
-            let text_edit = egui::TextEdit::multiline(code)
-                .desired_width(f32::INFINITY)
-                .font(egui::TextStyle::Monospace)
-                .layouter(&mut layouter);
-            ui.add(text_edit)
-        } else {
-            let text_edit = egui::TextEdit::multiline(code)
-                .desired_width(f32::INFINITY);
-            ui.add(text_edit)
-        };
+    // Made public and accepting ImeManager, context
+    pub fn editor_ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        ime_manager: &mut crate::ime::ImeManager,
+        ctx: &egui::Context,
+        // highlighter is already part of self.highlighter
+        // highlight_editor is already part of self.highlight_editor
+    ) {
+        // The ImeManager will now handle the TextEdit widget internally.
+        let _response = ime_manager.ui_for_editor(
+            &mut self.code,
+            ui,
+            ctx,
+            &mut self.highlighter,
+            self.highlight_editor,
+        );
     }
 }
 
